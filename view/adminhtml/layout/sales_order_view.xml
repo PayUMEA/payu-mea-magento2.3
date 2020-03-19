@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="PayU_EasyPlus::js/sales_order_tabs.js"/>
+    </head>
+    <body>
+        <!--
+        <referenceContainer name="left">
+            <referenceBlock name="sales_order_tabs">
+                <action method="addTab">
+                    <argument name="name" xsi:type="string">order_payueasyplus</argument>
+                    <argument name="block" xsi:type="string">PayU\EasyPlus\Block\Adminhtml\Order\View\Tab\Custom</argument>
+                </action>
+            </referenceBlock>
+        </referenceContainer>
+        -->
+    </body>
+</page>
