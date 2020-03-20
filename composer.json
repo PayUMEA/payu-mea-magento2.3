@@ -1,12 +1,12 @@
 {
-    "name": "payumea/payu-mea-magento2.2",
+    "name": "payumea/payu-mea-magento2.3",
     "description": "Secure payment processing via PayU MEA for Magento 2",
     "keywords": [
         "payu",
         "payu easy and plus merchant",
         "payment processing",
-        "payu magento 2 module",
-        "payu magento 2"
+        "payu magento 2.3 module",
+        "payu magento 2.3"
     ],
     "type": "magento2-module",
     "version": "1.0.6",
