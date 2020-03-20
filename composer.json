@@ -15,9 +15,6 @@
         "OSL-3.0",
         "AFL-3.0"
     ],
-    "require": {
-        ""
-    },
     "authors": [
         {
             "name": "Kenneth Onah",
