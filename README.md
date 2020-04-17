@@ -15,6 +15,28 @@ The extension requires the following extension in order to work properly:
 
 ## Installation
 
+## Via Composer
+
+You can install the extension via [Composer](http://getcomposer.org/). Run the following command:
+
+```bash
+composer require payumea/payu-mea-magento2
+```
+or add
+```bash
+payumea/payu-mea-magento2
+```
+to the **require** section of your composer.json and run `composer update`. After installing the extension you need 
+to enable the extension by excuting the following command.
+
+```bash
+bin/magento module:enable --clear-static-content PayU_EasyPlus
+bin/magento setup:upgrade
+bin/magento cache:clean
+```
+
+## Manualy from GitHub repository
+
 1) Download newest version of plugin from GitHub repository
 2) Unpack the downloaded archive
 3) Copy the files from "payu-mea-magento2-master" folder to your Magento 2 entity to folder \app\code\PayU\EasyPlus\. If such directory/path doesn't exist you will need to create it
