@@ -1,6 +1,6 @@
 {
     "name": "payumea/payu-mea-magento2.3",
-    "description": "Secure payment processing via PayU MEA for Magento 2",
+    "description": "Secure payment processing via PayU MEA for Magento 2.3",
     "keywords": [
         "payu",
         "payu easy and plus merchant",
@@ -19,6 +19,10 @@
         {
             "name": "Kenneth Onah",
             "homepage": "https://github.com/onahkenneth/module-payu-mea-magento2/contributors"
+        },
+        {
+            "name": "NetMechanic",
+            "homepage": "https://www.netmechanic.co.za/"
         }
     ],
     "autoload": {
