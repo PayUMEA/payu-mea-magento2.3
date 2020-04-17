@@ -20,11 +20,11 @@ The extension requires the following extension in order to work properly:
 You can install the extension via [Composer](http://getcomposer.org/). Run the following command:
 
 ```bash
-composer require payumea/payu-mea-magento2
+composer require payumea/payu-mea-magento2.3
 ```
 or add
 ```bash
-payumea/payu-mea-magento2
+payumea/payu-mea-magento2.3
 ```
 to the **require** section of your composer.json and run `composer update`. After installing the extension you need 
 to enable the extension by excuting the following command.
