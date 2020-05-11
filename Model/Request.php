@@ -41,8 +41,7 @@ class Request extends DataObject
                 'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
                 'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),
                 'redirectChannel'           => $paymentMethod->getConfigData('redirect_channel'),
-                'secure3d'                  => 'True',
-                'demoMode' => 'true',
+                'secure3d'                  => 'True'
             ));
 
         return $this;
