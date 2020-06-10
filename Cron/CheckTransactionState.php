@@ -72,6 +72,11 @@ class CheckTransactionState
     private $OrderConfig;
 
     /**
+     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     */
+    private $OrderRepository;
+
+    /**
      * CheckTransactionState constructor.
      * @param LoggerInterface $logger
      * @param \PayU\EasyPlus\Model\Api\Factory $apiFactory
@@ -87,6 +92,8 @@ class CheckTransactionState
      * @param Order\Email\Sender\InvoiceSender $invoiceSender
      * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
      * @param \Magento\Framework\DB\Transaction $transaction
+     * @param \Magento\Sales\Api\OrderRepositoryInterface $OrderRepository
+     * @param Order\Config $OrderConfig
      */
     public function __construct(
         LoggerInterface $logger,
@@ -103,6 +110,7 @@ class CheckTransactionState
         \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Framework\DB\Transaction $transaction,
+        \Magento\Sales\Api\OrderRepositoryInterface $OrderRepository,
         \Magento\Sales\Model\Order\Config $OrderConfig
     )
     {
@@ -120,6 +128,7 @@ class CheckTransactionState
         $this->invoiceSender = $invoiceSender;
         $this->_invoiceService = $invoiceService;
         $this->_transaction = $transaction;
+        $this->OrderRepository = $OrderRepository;
         $this->OrderConfig = $OrderConfig;
     }
 
@@ -130,17 +139,21 @@ class CheckTransactionState
     public function processReturn($data, &$order) {
         $data = (array)$data;
         $data['basket'] = array($data['basket']);
-        $data['paymentMethodsUsed'] = array($data['paymentMethodsUsed']);
+        //$data['paymentMethodsUsed'] = array($data['paymentMethodsUsed']);
 
         $transactionNotes = "<strong>-----PAYU STATUS CHECKED ---</strong><br />";
 
         if(!isset($data['resultCode']) || (in_array($data['resultCode'], array('POO5', 'EFTPRO_003', '999', '305')))) {
+            $this->logger->info("No resultCode");
+            $this->logger->info(json_encode($data));
             return;
         }
 
         if(!isset($data["transactionState"])
             || (!in_array($data['transactionState'],  array('PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED')))
         ) {
+            $this->logger->info("No transactionState");
+            $this->logger->info(json_encode($data));
             return;
         }
 
@@ -211,19 +224,31 @@ class CheckTransactionState
                 $this->logger->info("Not PayU");
                 continue;
             }
-            if(!isset($additional_info["fraud_details"])) {
-                $this->logger->info("No Details");
-                continue;
+
+
+
+            if(isset($additional_info["fraud_details"])) {
+                if(in_array($additional_info["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
+                    $this->logger->info("Already Success");
+                    continue;
+                }
+                $payUReference = $additional_info["fraud_details"]["return"]["payUReference"];
+            } else {
+                if(!isset($additional_info["payUReference"])) {
+                    $this->logger->info("No Details");
+                    continue;
+                }
+                $payUReference = $additional_info["payUReference"];
             }
-            if(in_array($additional_info["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
-                $this->logger->info("Already Success");
-                continue;
+
+            if(isset($additional_info["fraud_details"]["return"]["transactionState"])) {
+                $state_test = $additional_info["fraud_details"]["return"]["transactionState"];
+            } else {
+                $state_test = '';
             }
 
 
-
-
-            switch ($additional_info["fraud_details"]["return"]["transactionState"]) {
+            switch ($state_test) {
                 case AbstractPayment::TRANS_STATE_SUCCESSFUL:
                 case AbstractPayment::TRANS_STATE_FAILED:
                 case AbstractPayment::TRANS_STATE_EXPIRED:
@@ -241,7 +266,7 @@ class CheckTransactionState
                     $this->logger->info("Doing Check");
                     // We will check trans state again
                     $this->_code = $code;
-                    $this->_payUReference = $additional_info["fraud_details"]["return"]["payUReference"];
+                    $this->_payUReference = $payUReference;
                     // We must get some config settings
                     $this->initializeApi();
 
@@ -249,7 +274,25 @@ class CheckTransactionState
 
                     $return = $result->getData('return');
 
-                    $this->processReturn($return, $order);
+
+                    $order = $this->orderRepository->get($order->getId());
+
+                    if($order->getState() == \Magento\Sales\Model\Order::STATE_PROCESSING) {
+                        $this->logger->info("Order Completed, no need to run... order id = " . $order->getId());
+                        continue;
+                    }
+
+                    if($order->hasInvoices()) {
+                        $this->logger->info("Already Invoiced, no need to run... order id = " . $order->getId());
+                        continue;
+                    }
+
+                    try{
+                        $this->processReturn($return, $order);
+                    } catch (\Exception $exception) {
+                        $this->logger->info($exception->getMessage());
+                        $this->logger->info(json_encode($return));
+                    }
 
                     $order->setUpdatedAt(null);
                     $order->save();

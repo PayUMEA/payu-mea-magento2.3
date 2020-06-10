@@ -13,17 +13,19 @@ namespace PayU\EasyPlus\Controller\Payment;
 
 use PayU\EasyPlus\Helper\XmlHelper;
 use PayU\EasyPlus\Controller\AbstractAction;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
 
-class Notify extends AbstractAction
+class Notify extends AbstractAction implements CsrfAwareActionInterface
 {
     /**
      * Process Instant Payment Notification (IPN) from PayU
      */
     public function execute()
     {
-        $postData = file_get_contents("php://input");
 
-        file_put_contents(__DIR__ . '/log.txt', $postData, FILE_APPEND);
+        $postData = file_get_contents("php://input");
         $sxe = simplexml_load_string($postData);
 
         if(empty($sxe)) {
@@ -45,5 +47,24 @@ class Notify extends AbstractAction
         } else {
             http_response_code('500');
         }
+    }
+    /**
+     * @param RequestInterface $request
+     *
+     * @return bool|null
+     */
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
+    }
+
+    /**
+     * @param RequestInterface $request
+     *
+     * @return InvalidRequestException|null
+     */
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
     }
 }

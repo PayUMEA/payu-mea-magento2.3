@@ -433,6 +433,7 @@ abstract class AbstractPayment extends AbstractPayU
 
                 $payment->setSkipOrderProcessing(true);
 
+                $payment->setAdditionalInformation('payUReference', $payUReference);
             } else {
                 throw new LocalizedException(__('Contacting PayU gateway, error encountered'));
             }
