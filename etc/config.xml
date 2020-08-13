@@ -18,7 +18,7 @@
                 <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
                 <payment_methods>CREDITCARD</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -39,7 +39,7 @@
                 <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
                 <payment_methods>EBUCKS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -60,7 +60,7 @@
                 <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
                 <payment_methods>EFT_PRO</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -81,7 +81,7 @@
                 <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>DISCOVERYMILES</payment_methods>
                 <redirect_channel>web</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -102,7 +102,7 @@
                 <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>MOBICRED</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -123,7 +123,7 @@
                 <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>UCOUNT</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -145,7 +145,7 @@
                 <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
                 <payment_methods>RCS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
@@ -167,7 +167,7 @@
                 <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
                 <payment_methods>Rcs_Plc</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>50</min_order_total>
+                <min_order_total>1</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>

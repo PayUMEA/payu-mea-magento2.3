@@ -61,7 +61,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -145,7 +145,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -229,7 +229,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -313,7 +313,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -397,7 +397,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -481,7 +481,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -566,7 +566,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -652,7 +652,7 @@
                 </field>
                 <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Minimum Order Total</label>
-                    <comment>Cannot be less than 50.00</comment>
+                    <comment>Cannot be less than 1.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
                 <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
