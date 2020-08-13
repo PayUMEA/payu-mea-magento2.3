@@ -16,6 +16,7 @@ use PayU\EasyPlus\Model\Mobicred;
 use PayU\EasyPlus\Model\Ucount;
 use PayU\EasyPlus\Model\Rcs;
 use PayU\EasyPlus\Model\RcsPlc;
+use PayU\EasyPlus\Model\Fasta;
 
 /**
  * Abstract Checkout Controller
@@ -29,7 +30,8 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         EFTPro::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
         DiscoveryMiles::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
         Mobicred::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Ucount::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider'
+        Ucount::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        Fasta::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider'
     ];
 
     /**

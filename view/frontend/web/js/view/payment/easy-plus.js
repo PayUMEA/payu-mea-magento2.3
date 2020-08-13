@@ -46,6 +46,10 @@ define(
             {
                 type: 'payumea_ucount',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/ucount-method'
+            },
+            {
+                type: 'payumea_fasta',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/fasta-method'
             }
         );
         /** Add view logic here if needed */

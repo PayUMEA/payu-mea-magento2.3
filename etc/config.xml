@@ -13,9 +13,9 @@
                 <active>0</active>
                 <title>Credit Card</title>
                 <environment>0</environment>
-                <api_username>100032</api_username>
-                <api_password>PypWWegU</api_password>
-                <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>CREDITCARD</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -34,9 +34,9 @@
                 <active>0</active>
                 <title>eBucks</title>
                 <environment>0</environment>
-                <api_username>100032</api_username>
-                <api_password>PypWWegU</api_password>
-                <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>EBUCKS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -55,9 +55,9 @@
                 <active>0</active>
                 <title>EFT Pro</title>
                 <environment>0</environment>
-                <api_username>100032</api_username>
-                <api_password>PypWWegU</api_password>
-                <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>EFT_PRO</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -140,9 +140,9 @@
                 <active>0</active>
                 <title>Rcs</title>
                 <environment>0</environment>
-                <api_username>100032</api_username>
-                <api_password>PypWWegU</api_password>
-                <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>RCS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -162,9 +162,9 @@
                 <active>0</active>
                 <title>Rcs Plc</title>
                 <environment>0</environment>
-                <api_username>100032</api_username>
-                <api_password>PypWWegU</api_password>
-                <safe_key>{CE62CE80-0EFD-4035-87C1-8824C5C46E7F}</safe_key>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>Rcs_Plc</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -178,6 +178,28 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_rcs_plc>
+
+            <payumea_fasta>
+                <model>PayU\EasyPlus\Model\Fasta</model>
+                <active>0</active>
+                <title>FASTA</title>
+                <environment>0</environment>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <payment_methods>FASTA</payment_methods>
+                <redirect_channel>responsive</redirect_channel>
+                <min_order_total>500</min_order_total>
+                <max_order_total>200000</max_order_total>
+                <developer>
+                    <active>0</active>
+                </developer>
+                <payment_url>
+                    <notification_url>payu_easyplus/payment/notify</notification_url>
+                    <return_url>payu_easyplus/payment/response</return_url>
+                    <cancel_url>payu_easyplus/payment/cancel</cancel_url>
+                </payment_url>
+            </payumea_fasta>
         </payment>
     </default>
 </config>

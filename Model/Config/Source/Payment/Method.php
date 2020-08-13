@@ -28,8 +28,9 @@ class Method implements \Magento\Framework\Option\ArrayInterface
 		'EFT' 				=> 'EFT',
 		'EFT_PRO' 			=> 'EFT Pro',
 		'MASTERPASS' 		=> 'Master Pass',
-		'RCS_PLC' 		=> 'RCS PLC',
-		'RCS'				=> 'RCS'
+		'RCS_PLC' 			=> 'RCS PLC',
+		'RCS'				=> 'RCS',
+		'FASTA'				=> 'FASTA'
 	);
 
 	/**

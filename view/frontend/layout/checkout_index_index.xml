@@ -53,6 +53,10 @@
                                                                         <item name="payumea_rcs_plc" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
                                                                         </item>
+
+                                                                        <item name="payumea_fasta" xsi:type="array">
+                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
+                                                                        </item>
                                                                     </item>
                                                                 </item>
                                                             </item>

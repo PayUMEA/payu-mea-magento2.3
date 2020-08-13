@@ -34,7 +34,8 @@ class PayUConfigProvider implements ConfigProviderInterface
         EFTPro::CODE,
         DiscoveryMiles::CODE,
         Mobicred::CODE,
-        Ucount::CODE
+        Ucount::CODE,
+        Fasta::CODE
     ];
 
     /**

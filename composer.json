@@ -9,7 +9,7 @@
         "payu magento 2.3"
     ],
     "type": "magento2-module",
-    "version": "1.0.7.1",
+    "version": "1.0.7.2",
     "homepage": "https://payu.co.za/",
     "license": [
         "OSL-3.0",
@@ -23,6 +23,10 @@
         {
             "name": "NetMechanic",
             "homepage": "https://www.netmechanic.co.za/"
+        },
+        {
+            "name": "Jakub Łukanowski @PayU"
+            "homepage": "https://payu.com"
         }
     ],
     "autoload": {
