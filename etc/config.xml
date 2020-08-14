@@ -182,7 +182,7 @@
             <payumea_fasta>
                 <model>PayU\EasyPlus\Model\Fasta</model>
                 <active>0</active>
-                <title>FASTA</title>
+                <title>FASTA Instant Credit</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
                 <api_password>WSAUFbw6</api_password>

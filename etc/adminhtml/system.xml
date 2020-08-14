@@ -686,7 +686,7 @@
             </group>
 
             <group id="payumea_fasta" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
-                <label>PayU MEA FASTA</label>
+                <label>PayU MEA FASTA Instant Credit</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
                 </comment>
