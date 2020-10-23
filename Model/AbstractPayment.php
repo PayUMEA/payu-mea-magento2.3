@@ -740,6 +740,19 @@ abstract class AbstractPayment extends AbstractPayU
             $this->debugData(['info' => $order->canInvoice()]);
             if($order->canInvoice()) {
                 $invoice = $this->_invoiceService->prepareInvoice($order);
+
+                /**
+                 * 2020/10/23 Double Invoice Correction
+                 * Force reload order state to check status just before update,
+                 * discard invoice if status changed since start of process
+                 */
+                $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
+                $this->debugData(['can_invoice' => $order_status_test->canInvoice()]);
+                if(!$order_status_test->canInvoice()) {
+                    // Simply just skip this section
+                    goto cannot_invoice_marker;
+                }
+
                 $invoice->register();
                 $invoice->save();
                 $transactionService = $this->_transaction->addObject(
@@ -763,8 +776,12 @@ abstract class AbstractPayment extends AbstractPayU
                     ->save();
 
             } else {
-
-                $test = 1;
+                /**
+                 * Double Invoice Correction
+                 * 2020/10/23
+                 */
+                cannot_invoice_marker:
+                $this->debugData(['info' => 'Already invoiced, skip']);
             }
 
         } catch (\Exception $e) {
