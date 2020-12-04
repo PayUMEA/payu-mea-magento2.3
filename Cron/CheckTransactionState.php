@@ -163,16 +163,17 @@ class CheckTransactionState
         switch ($data['transactionState']) {
             // Payment completed
             case 'SUCCESSFUL':
-                $order->addStatusHistoryComment($transactionNotes, 'processing');
+                $order->addStatusHistoryComment($transactionNotes);
                 $this->invoiceAndNotifyCustomer($order);
                 break;
             case 'FAILED':
             case 'TIMEOUT':
             case 'EXPIRED':
-                $order->addStatusHistoryComment($transactionNotes, 'canceled');
+                $order->setState("canceled");
+                $order->addStatusHistoryComment($transactionNotes, true);
                 break;
             default:
-                $order->addStatusHistoryComment($transactionNotes);
+                $order->addStatusHistoryComment($transactionNotes, true);
                 break;
         }
 
@@ -208,7 +209,6 @@ class CheckTransactionState
      */
     public function execute()
     {
-
         $orders = $this->getOrderCollection();
         foreach ($orders->getItems() as $order) {
             $payment = $order->getPayment();
@@ -218,14 +218,10 @@ class CheckTransactionState
             $id = $order->getEntityId();
             $this->logger->info("Check: $id");
 
-
-            // Only if a
             if(false === strpos($code, 'payumea')) {
                 $this->logger->info("Not PayU");
                 continue;
             }
-
-
 
             if(isset($additional_info["fraud_details"])) {
                 if(in_array($additional_info["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
@@ -247,20 +243,18 @@ class CheckTransactionState
                 $state_test = '';
             }
 
-
             switch ($state_test) {
                 case AbstractPayment::TRANS_STATE_SUCCESSFUL:
                 case AbstractPayment::TRANS_STATE_FAILED:
                 case AbstractPayment::TRANS_STATE_EXPIRED:
                 case AbstractPayment::TRANS_STATE_TIMEOUT:
                     $this->logger->info("Already Success Status");
-                    continue 2;
                     break;
                 default:
 
                     if(!$this->shouldDoCheck($order, $payment)) {
                         $this->logger->info("Check not timed");
-                        continue 2;
+                        break;
                     }
 
                     $this->logger->info("Doing Check");
@@ -274,17 +268,16 @@ class CheckTransactionState
 
                     $return = $result->getData('return');
 
-
                     $order = $this->orderRepository->get($order->getId());
 
                     if($order->getState() == \Magento\Sales\Model\Order::STATE_PROCESSING) {
                         $this->logger->info("Order Completed, no need to run... order id = " . $order->getId());
-                        continue;
+                        break;
                     }
 
                     if($order->hasInvoices()) {
                         $this->logger->info("Already Invoiced, no need to run... order id = " . $order->getId());
-                        continue;
+                        break;
                     }
 
                     try{
