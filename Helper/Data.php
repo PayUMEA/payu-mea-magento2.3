@@ -39,7 +39,7 @@ class Data extends AbstractHelper
      *
      * @var array
      */
-    protected $allowedCurrencyCodes = ['NGN', 'ZAR'];
+    protected $allowedCurrencyCodes = [ 'NGN', 'ZAR', 'KES', 'TZS', 'ZMW', 'USD'];
 
     /**
      * @param Context $context

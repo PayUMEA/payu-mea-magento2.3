@@ -89,7 +89,7 @@ abstract class AbstractPayment extends AbstractPayU
     protected $_minAmount                   = null;
     protected $_maxAmount                   = null;
     protected $_redirectUrl                 = '';
-    protected $_supportedCurrencyCodes      = array('ZAR', 'NGN');
+    protected $_supportedCurrencyCodes      = array( 'NGN', 'ZAR', 'KES', 'TZS', 'ZMW', 'USD');
 
     /**
      * Fields that should be replaced in debug with '***'
@@ -297,6 +297,7 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function canUseForCurrency($currencyCode)
     {
+
         if (!in_array($currencyCode, $this->_supportedCurrencyCodes)) {
             return false;
         }
