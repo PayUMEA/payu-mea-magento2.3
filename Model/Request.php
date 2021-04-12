@@ -9,6 +9,7 @@
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+
 namespace PayU\EasyPlus\Model;
 
 use PayU\EasyPlus\Helper\Data;
@@ -54,6 +55,7 @@ class Request extends DataObject
      * @param AbstractPayment $paymentMethod
      * @return $this
      */
+
 	public function setDataFromOrder(
         Order $order,
         AbstractPayment $paymentMethod
@@ -67,7 +69,11 @@ class Request extends DataObject
             'merchantUserId' => $order->getCustomerId(),
             'email' => $order->getCustomerEmail(),
             'firstName' => $order->getCustomerFirstName(),
-            'lastName' => $order->getCustomerLastName())
+            'lastName' => $order->getCustomerLastName(),
+            'mobile' => $order->getShippingAddress()->getTelephone(),
+            'regionalId' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId())),
+            'countryCode' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId()))
+        )
         );
 
         return $this;

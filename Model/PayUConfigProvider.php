@@ -35,7 +35,13 @@ class PayUConfigProvider implements ConfigProviderInterface
         DiscoveryMiles::CODE,
         Mobicred::CODE,
         Ucount::CODE,
-        Fasta::CODE
+        Fasta::CODE,
+        Mpesa::CODE,
+        AirtelMoney::CODE,
+        MobileBanking::CODE,
+        MtnMobile::CODE,
+        Tigopesa::CODE,
+        Equitel::CODE
     ];
 
     /**

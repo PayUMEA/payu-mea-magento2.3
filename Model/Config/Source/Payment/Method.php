@@ -30,7 +30,12 @@ class Method implements \Magento\Framework\Option\ArrayInterface
 		'MASTERPASS' 		=> 'Master Pass',
 		'RCS_PLC' 			=> 'RCS PLC',
 		'RCS'				=> 'RCS',
-		'FASTA'				=> 'FASTA Instant Credit'
+		'FASTA'				=> 'FASTA Instant Credit',
+		'MPESA'				=> 'MPESA',
+		'AIRTEL_MONEY'		=> 'AIRTEL MONEY',
+		'MOBILE_BANKING'	=> 'MOBILE BANKING',
+		'MTN_MOBILE'		=> 'MTN MOBILE',
+		'TIGOPESA'			=> 'TIGOPESA'
 	);
 
 	/**

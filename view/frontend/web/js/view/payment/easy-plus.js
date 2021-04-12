@@ -50,6 +50,30 @@ define(
             {
                 type: 'payumea_fasta',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/fasta-method'
+            },
+            {
+                type: 'payumea_mpesa',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/mpesa-method'
+            },
+            {
+                type: 'payumea_airtel_money',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/airtel_money-method'
+            },
+            {
+                type: 'payumea_mobile_banking',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/mobile_banking-method'
+            },
+            {
+                type: 'payumea_mtn_mobile',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/mtn_mobile-method'
+            },
+            {
+                type: 'payumea_tigopesa',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/tigopesa-method'
+            },
+            {
+                type: 'payumea_equitel',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/equitel-method'
             }
         );
         /** Add view logic here if needed */

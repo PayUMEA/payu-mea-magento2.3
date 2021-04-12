@@ -9,7 +9,7 @@
         "payu magento 2.3"
     ],
     "type": "magento2-module",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "homepage": "https://payu.co.za/",
     "license": [
         "OSL-3.0",

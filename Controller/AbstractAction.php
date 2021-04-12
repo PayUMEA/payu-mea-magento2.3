@@ -17,6 +17,12 @@ use PayU\EasyPlus\Model\Ucount;
 use PayU\EasyPlus\Model\Rcs;
 use PayU\EasyPlus\Model\RcsPlc;
 use PayU\EasyPlus\Model\Fasta;
+use PayU\EasyPlus\Model\Mpesa;
+use PayU\EasyPlus\Model\AirtelMoney;
+use PayU\EasyPlus\Model\MobileBanking;
+use PayU\EasyPlus\Model\MtnMobile;
+use PayU\EasyPlus\Model\Tigopesa;
+use PayU\EasyPlus\Model\Equitel;
 
 /**
  * Abstract Checkout Controller
@@ -31,7 +37,15 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         DiscoveryMiles::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
         Mobicred::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
         Ucount::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Fasta::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider'
+        Rcs::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        RcsPlc::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        Fasta::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        Mpesa::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        AirtelMoney::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        MobileBanking::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        MtnMobile::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        Tigopesa::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
+        Equitel::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider'
     ];
 
     /**

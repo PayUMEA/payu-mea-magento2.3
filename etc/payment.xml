@@ -35,5 +35,23 @@
         <method name="payumea_fasta">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="payumea_mpesa">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_airtel_money">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_mobile_banking">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_mtn_mobile">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_tigopesa">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_equitel">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
     </methods>
 </payment>
