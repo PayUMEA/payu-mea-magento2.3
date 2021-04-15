@@ -69,10 +69,11 @@ class Request extends DataObject
             'merchantUserId' => $order->getCustomerId(),
             'email' => $order->getCustomerEmail(),
             'firstName' => $order->getCustomerFirstName(),
-            'lastName' => $order->getCustomerLastName(),
-            'mobile' => $order->getShippingAddress()->getTelephone(),
-            'regionalId' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId())),
-            'countryCode' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId()))
+            'lastName' => $order->getCustomerLastName()
+            //,
+            //'mobile' => $order->getShippingAddress()->getTelephone(),
+            //'regionalId' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId())),
+            //'countryCode' => preg_replace('/\D\D/', '27', str_replace("KE", "27", $order->getShippingAddress()->getCountryId()))
         )
         );
 
