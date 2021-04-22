@@ -1,10 +1,10 @@
-# PayU MEA Magento 2/2.3 extension #
+# PayU MEA Magento 2.X extension #
 
-This guide details how to install the PayU MEA Magento v2 extension
+This guide details how to install the PayU MEA Magento v2.X extension
 This plugin is also compatible with Magento v2.3
 
 ## Prerequisites
-* Magento 2/2.3 installed application
+* Magento 2.X installed application
 * SSH access
 
 ## Dependencies
@@ -48,10 +48,11 @@ php bin/magento module:enable PayU_EasyPlus
 php bin/magento setup:upgrade
 php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy
+php bin/magento cache:clean
 ```
 
 ## Configuration
 To configure the extension, you have to navigate to **Stores > Configuration > Sales > Payment Methods** and find PayU 
 extension listed among other payment methods
 
-For Kenyan payment methods (Mpesa, Equitel, Airtel Money, Mobile Banking) - configration in Stores->Configuration->Customers->Customer Configuration->Name and Address Options->Show Telephone must be set to "Required"
+For Kenyan payment methods (Mpesa, Equitel, Airtel Money, Mobile Banking) - configuration in Stores->Configuration->Customers->Customer Configuration->Name and Address Options->Show Telephone must be set to "Required"
