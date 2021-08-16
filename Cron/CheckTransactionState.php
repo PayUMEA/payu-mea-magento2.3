@@ -26,6 +26,8 @@ class CheckTransactionState
     /** @var \Magento\Framework\App\Config\ScopeConfigInterface  */
     protected $_scopeConfig;
 
+    protected $orderFactory;
+
 
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
@@ -111,7 +113,8 @@ class CheckTransactionState
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Framework\DB\Transaction $transaction,
         \Magento\Sales\Api\OrderRepositoryInterface $OrderRepository,
-        \Magento\Sales\Model\Order\Config $OrderConfig
+        \Magento\Sales\Model\Order\Config $OrderConfig,
+        \Magento\Sales\Model\OrderFactory $orderFactory
     )
     {
         $this->logger = $logger;
@@ -130,6 +133,8 @@ class CheckTransactionState
         $this->_transaction = $transaction;
         $this->OrderRepository = $OrderRepository;
         $this->OrderConfig = $OrderConfig;
+        $this->orderFactory = $orderFactory;
+
     }
 
     /**
@@ -169,8 +174,8 @@ class CheckTransactionState
             case 'FAILED':
             case 'TIMEOUT':
             case 'EXPIRED':
-                $order->setState("canceled");
-                $order->addStatusHistoryComment($transactionNotes, true);
+                $order->registerCancellation($transactionNotes);
+                $order->save();
                 break;
             default:
                 $order->addStatusHistoryComment($transactionNotes, true);
@@ -318,7 +323,7 @@ class CheckTransactionState
 
 
         $ranges = [];
-        //$ranges[] = [3,4];
+        //$ranges[] = [2,4];
         $ranges[] = [5,9];
         $ranges[] = [10,19];
         $ranges[] = [20,29];
@@ -381,9 +386,26 @@ class CheckTransactionState
         try {
             $order->setCanSendNewEmailFlag(true);
             $this->orderSender->send($order);
-
+            $this->logger->info("Can Invoice:" . $order->canInvoice());
+         //   $this->debugData(['info' => $order->canInvoice()]);
             if($order->canInvoice()) {
                 $invoice = $this->_invoiceService->prepareInvoice($order);
+
+
+                /**
+                 * 2021/06/16 Double Invoice Correction
+                 * Force reload order state to check status just before update,
+                 * discard invoice if status changed since start of process
+                 */
+                $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
+                $this->logger->info('can_invoice:' .  $order_status_test->canInvoice());
+              //  $this->debugData(['can_invoice' => $order_status_test->canInvoice()]);
+                if(!$order_status_test->canInvoice()) {
+                    // Simply just skip this section
+                    goto cannot_invoice_marker;
+                }
+
+
                 $invoice->register();
                 $invoice->save();
                 $transactionService = $this->_transaction->addObject(
@@ -407,8 +429,13 @@ class CheckTransactionState
                     ->save();
 
             } else {
-
-                $test = 1;
+                /**
+                 * Double Invoice Correction
+                 * 2021/06/16
+                 */
+                cannot_invoice_marker:
+                $this->logger->info('Already invoiced, skip');
+            //    $this->debugData(['info' => 'Already invoiced, skip']);
             }
 
         } catch (\Exception $e) {
