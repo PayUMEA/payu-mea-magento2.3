@@ -8,6 +8,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
     <default>
         <payment>
+
             <payumea_creditcard>
                 <model>PayU\EasyPlus\Model\CreditCard</model>
                 <active>0</active>
@@ -29,6 +30,30 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_creditcard>
+
+            <payumea_payflex>
+                <model>PayU\EasyPlus\Model\Payflex</model>
+                <active>0</active>
+                <title>Payflex</title>
+                <environment>0</environment>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <payment_methods>PAYFLEX</payment_methods>
+                <redirect_channel>responsive</redirect_channel>
+                <min_order_total>1</min_order_total>
+                <max_order_total>5000000</max_order_total>
+                <developer>
+                    <active>0</active>
+                </developer>
+                <payment_url>
+                    <notification_url>payu_easyplus/payment/notify</notification_url>
+                    <return_url>payu_easyplus/payment/response</return_url>
+                    <cancel_url>payu_easyplus/payment/cancel</cancel_url>
+                </payment_url>
+            </payumea_payflex>
+
+
             <payumea_ebucks>
                 <model>PayU\EasyPlus\Model\Ebucks</model>
                 <active>0</active>

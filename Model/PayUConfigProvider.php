@@ -41,7 +41,8 @@ class PayUConfigProvider implements ConfigProviderInterface
         MobileBanking::CODE,
         MtnMobile::CODE,
         Tigopesa::CODE,
-        Equitel::CODE
+        Equitel::CODE,
+        Payflex::CODE,
     ];
 
     /**
@@ -65,7 +66,6 @@ class PayUConfigProvider implements ConfigProviderInterface
         Repository $assetRepo
     ) {
         $this->assetRepo = $assetRepo;
-
         foreach ($this->methodCodes as $code) {
             $this->methods[$code] = $paymentHelper->getMethodInstance($code);
         }

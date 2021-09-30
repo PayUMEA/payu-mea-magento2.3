@@ -11,6 +11,9 @@
         <method name="payumea_creditcard">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="payumea_payflex">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
         <method name="payumea_ebucks">
             <allow_multiple_address>1</allow_multiple_address>
         </method>

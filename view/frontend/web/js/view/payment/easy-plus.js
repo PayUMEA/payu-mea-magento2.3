@@ -20,6 +20,10 @@ define(
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/creditcard-method'
             },
             {
+                type: 'payumea_payflex',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/payflex-method'
+            },
+            {
                 type: 'payumea_ebucks',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/ebucks-method'
             },

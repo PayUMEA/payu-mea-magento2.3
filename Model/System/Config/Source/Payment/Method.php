@@ -16,14 +16,15 @@ class Method implements \Magento\Framework\Option\ArrayInterface
 	// Load PayU payment methods
 	protected $payments = array(
 		'CREDITCARD' 		=> 'Credit Card',
+		'PAYFLEX' 		    => 'Payflex',
 		'CREDITCARD_PAYU' 	=> 'Credit Card (PayU)',
-		'LOYALTY' 			=> 'Loyalty', 
+		'LOYALTY' 			=> 'Loyalty',
 		'WALLET' 			=> 'Wallet',
-		'WALLET_PAYU' 		=> 'Wallet (PayU)', 
-		'DISCOVERYMILES' 	=> 'Discovery Miles', 
-		'GLOBALPAY' 		=> 'Global Pay', 
-		'DEBITCARD' 		=> 'Debit Card', 
-		'EBUCKS' 			=> 'eBucks', 
+		'WALLET_PAYU' 		=> 'Wallet (PayU)',
+		'DISCOVERYMILES' 	=> 'Discovery Miles',
+		'GLOBALPAY' 		=> 'Global Pay',
+		'DEBITCARD' 		=> 'Debit Card',
+		'EBUCKS' 			=> 'eBucks',
 		'PAYPAL' 			=> 'Paypal',
 		'EFT' 				=> 'EFT',
 		'EFT_PRO' 			=> 'EFT Pro',
@@ -50,7 +51,7 @@ class Method implements \Magento\Framework\Option\ArrayInterface
 		foreach ($this->payments as $key => $value ) {
 			$payments_array[] = array( 'value' => $key, 'label' => $value );
 		}
-		
+
 		return $payments_array;
 	}
 

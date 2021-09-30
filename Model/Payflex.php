@@ -15,14 +15,14 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\InfoInterface;
 
 /**
- * Payment model for payment method CreditCard
+ * Payment model for payment method Payflex
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class CreditCard extends AbstractPayment
+class Payflex extends AbstractPayment
 {
-    const CODE = 'payumea_creditcard';
+    const CODE = 'payumea_payflex';
 
     /**
      * Payment code
@@ -53,12 +53,4 @@ class CreditCard extends AbstractPayment
 
         return $this;
     }
-
-    /**
-     * @param $additional_information
-     */
-    public function setMethodAdditionalInformation(&$additional_information) {
-        $additional_information['showBudget'] = (1==$this->getConfigData('budget')) ? "True" : "False";
-    }
-
 }

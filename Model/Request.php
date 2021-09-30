@@ -18,6 +18,7 @@ use Magento\Framework\DataObject;
 
 class Request extends DataObject
 {
+
     /**
      * Set PayU data to request.
      *
@@ -32,18 +33,25 @@ class Request extends DataObject
         Order $order,
         $helper
     ) {
+
+        $additional_information = array(
+            'merchantReference'         => $order->getIncrementId(),
+            'notificationUrl'           => $helper->getNotificationUrl($paymentMethod->getCode()),
+            'cancelUrl'                 => $helper->getCancelUrl($paymentMethod->getCode()),
+            'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
+            'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),
+            'redirectChannel'           => $paymentMethod->getConfigData('redirect_channel'),
+            'secure3d'                  => 'True'
+        );
+
+        if(method_exists($paymentMethod, 'setMethodAdditionalInformation')) {
+            $paymentMethod->setMethodAdditionalInformation($additional_information);
+        }
+
         $this->setData('Api', $paymentMethod->getApi()->getApiVersion())
             ->setData('Safekey', $paymentMethod->getApi()->getSafeKey())
             ->setData('TransactionType', 'PAYMENT')
-            ->setData('AdditionalInformation', array(
-                'merchantReference'         => $order->getIncrementId(),
-                'notificationUrl'           => $helper->getNotificationUrl($paymentMethod->getCode()),
-                'cancelUrl'                 => $helper->getCancelUrl($paymentMethod->getCode()),
-                'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
-                'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),
-                'redirectChannel'           => $paymentMethod->getConfigData('redirect_channel'),
-                'secure3d'                  => 'True'
-            ));
+            ->setData('AdditionalInformation', $additional_information);
 
         return $this;
 	}
@@ -285,7 +293,7 @@ class Request extends DataObject
 		);
 
 		if(isset($countrycode[$code])) {
-			return (int) $countrycode[$code];	
+			return (int) $countrycode[$code];
 		}
 		return 27;
 	}
@@ -322,4 +330,5 @@ class Request extends DataObject
 
         return $this;
     }
+
 }
