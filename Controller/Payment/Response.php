@@ -25,6 +25,15 @@ class Response extends AbstractAction
     public function execute()
     {
 
+        $process_id = uniqid();
+        $process_string = self::class;
+
+        $this->_getSession()->setPayUProcessId($process_id);
+        $this->_getSession()->setPayUProcessString($process_string);
+
+        $this->_logger->info("($process_id) START $process_string");
+
+
         /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
@@ -34,14 +43,18 @@ class Response extends AbstractAction
 
             // if there is an order - load it
             $orderId = $this->_getCheckoutSession()->getLastOrderId();
+
+
             /** @var \Magento\Sales\Model\Order $order */
             $order = $orderId ? $this->_orderFactory->create()->load($orderId) : false;
 
             if($order->getState() == \Magento\Sales\Model\Order::STATE_PROCESSING) {
+                $this->_logger->info("($process_id) ($orderId) PayU $process_string ALREADY SUCCESS (from IPN) -> Redirect User");
                 return $this->sendSuccessPage($order);
             }
 
             if($payu && $order) {
+
                 $this->response->setData('params', $payu);
 
                 $result = $this->response->processReturn($order);

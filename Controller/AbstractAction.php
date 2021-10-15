@@ -126,8 +126,13 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      * @var \PayU\EasyPlus\Model\Response
      */
     protected $response;
+    /**
+     * @var \Magento\Payment\Model\Method\Logger
+     */
+    protected $_logger;
 
     /**
+     * AbstractAction constructor.
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Checkout\Model\Session $checkoutSession
@@ -136,8 +141,9 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      * @param \Magento\Framework\Url\Helper\Data $urlHelper
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Magento\Quote\Model\QuoteManagement $quoteManagement
-     * @param \PayU\EasyPlus\Model\Error\Code $errorCodes,
+     * @param \PayU\EasyPlus\Model\Error\Code $errorCodes
      * @param \PayU\EasyPlus\Model\Response\Factory $responseFactory
+     * @param \Magento\Payment\Model\Method\Logger $logger
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -149,7 +155,8 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         \Magento\Customer\Model\Url $customerUrl,
         \Magento\Quote\Model\QuoteManagement $quoteManagement,
         \PayU\EasyPlus\Model\Error\Code $errorCodes,
-        \PayU\EasyPlus\Model\Response\Factory $responseFactory
+        \PayU\EasyPlus\Model\Response\Factory $responseFactory,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
@@ -163,6 +170,8 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         parent::__construct($context);
 
         $this->response = $responseFactory->create();
+        $this->_logger = $logger;
+
     }
 
     /**
@@ -204,9 +213,9 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
             }
             return $this;
         }
-        $reference = $this->getRequest()->getParam('PayUReference') ?: 
+        $reference = $this->getRequest()->getParam('PayUReference') ?:
             $this->getRequest()->getParam('payUReference');
-            
+
         if ($reference) {
             if ($reference !== $this->_getSession()->getCheckoutReference()) {
                 throw new \Magento\Framework\Exception\LocalizedException(

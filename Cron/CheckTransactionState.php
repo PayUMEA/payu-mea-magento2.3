@@ -149,7 +149,7 @@ class CheckTransactionState
         $transactionNotes = "<strong>-----PAYU STATUS CHECKED ---</strong><br />";
 
         if(!isset($data['resultCode']) || (in_array($data['resultCode'], array('POO5', 'EFTPRO_003', '999', '305')))) {
-            $this->logger->info("No resultCode");
+            $this->logger->info("($this->process_id) No resultCode");
             $this->logger->info(json_encode($data));
             return;
         }
@@ -157,7 +157,7 @@ class CheckTransactionState
         if(!isset($data["transactionState"])
             || (!in_array($data['transactionState'],  array('PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED')))
         ) {
-            $this->logger->info("No transactionState");
+            $this->logger->info("($this->process_id) No transactionState");
             $this->logger->info(json_encode($data));
             return;
         }
@@ -214,6 +214,20 @@ class CheckTransactionState
      */
     public function execute()
     {
+
+
+        $bypass_payu_cron = $this->getCRONConfigData('bypass_payu_cron');
+
+        if('1' ===  $bypass_payu_cron) {
+            $this->logger->info("PayU CRON DISABLED");
+            return;
+        }
+
+        $process_id = uniqid();
+        $this->process_id = $process_id;
+
+        $this->logger->info("PayU CRON Started, PID: $process_id");
+
         $orders = $this->getOrderCollection();
         foreach ($orders->getItems() as $order) {
             $payment = $order->getPayment();
@@ -221,22 +235,22 @@ class CheckTransactionState
             $code = $payment->getData('method');
 
             $id = $order->getEntityId();
-            $this->logger->info("Check: $id");
+            $this->logger->info("($process_id) Check: $id");
 
             if(false === strpos($code, 'payumea')) {
-                $this->logger->info("Not PayU");
+                $this->logger->info("($process_id) Not PayU");
                 continue;
             }
 
             if(isset($additional_info["fraud_details"])) {
                 if(in_array($additional_info["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
-                    $this->logger->info("Already Success");
+                    $this->logger->info("($process_id) ($id) Already Success");
                     continue;
                 }
                 $payUReference = $additional_info["fraud_details"]["return"]["payUReference"];
             } else {
                 if(!isset($additional_info["payUReference"])) {
-                    $this->logger->info("No Details");
+                    $this->logger->info("($process_id) No Details");
                     continue;
                 }
                 $payUReference = $additional_info["payUReference"];
@@ -253,16 +267,16 @@ class CheckTransactionState
                 case AbstractPayment::TRANS_STATE_FAILED:
                 case AbstractPayment::TRANS_STATE_EXPIRED:
                 case AbstractPayment::TRANS_STATE_TIMEOUT:
-                    $this->logger->info("Already Success Status");
+                    $this->logger->info(" ($id) Already Success Status");
                     break;
                 default:
 
                     if(!$this->shouldDoCheck($order, $payment)) {
-                        $this->logger->info("Check not timed");
+                        $this->logger->info("($process_id) ($id) Check not timed");
                         break;
                     }
 
-                    $this->logger->info("Doing Check");
+                    $this->logger->info("($process_id) ($id) Doing Check");
                     // We will check trans state again
                     $this->_code = $code;
                     $this->_payUReference = $payUReference;
@@ -281,7 +295,7 @@ class CheckTransactionState
                     }
 
                     if($order->hasInvoices()) {
-                        $this->logger->info("Already Invoiced, no need to run... order id = " . $order->getId());
+                        $this->logger->info("($process_id) Already Invoiced, no need to run... order id = " . $order->getId());
                         break;
                     }
 
@@ -299,7 +313,7 @@ class CheckTransactionState
         };
 
         // Do your Stuff
-        $this->logger->info('Cron Works');
+        $this->logger->info("PayU CRON Ended, PID: $process_id");
     }
 
     protected function shouldDoCheck(&$order, $payment)
@@ -313,8 +327,22 @@ class CheckTransactionState
         $minutes_created = (int) ceil (($time_now - $created_at) / 60 );
         $minutes_updated = $minutes_created - (int) ceil (($time_now - $updated_at) / 60 );
 
-        $this->logger->info("minutes_created: $minutes_created");
-        $this->logger->info("minutes_updated: $minutes_updated");
+
+        $payumea_cron_delay = $this->getCRONConfigData('payumea_cron_delay');
+
+        if(empty($payumea_cron_delay)) {
+            $payumea_cron_delay = "5";
+        }
+
+        $this->logger->info("($this->process_id) minutes_created: $minutes_created - Delay: $payumea_cron_delay");
+        $this->logger->info("($this->process_id) minutes_updated: $minutes_updated - Delay: $payumea_cron_delay");
+
+
+        $minutes_created = $minutes_created - $payumea_cron_delay;
+        $minutes_updated = $minutes_updated - $payumea_cron_delay;
+
+
+
 
         // After X minute
     //    if($minutes_created == 1) { return true; }
@@ -323,7 +351,7 @@ class CheckTransactionState
 
 
         $ranges = [];
-        //$ranges[] = [2,4];
+        $ranges[] = [1,4];
         $ranges[] = [5,9];
         $ranges[] = [10,19];
         $ranges[] = [20,29];
@@ -334,10 +362,17 @@ class CheckTransactionState
         $ranges[] = [(6*60),(12*60)-1];
         $ranges[] = [(12*60),(24*60)-1];
 
+
+
         for ($i=1;$i<=31;$i++) {
             $ii = $i * 24;
             $ranges[] = [($ii*60),($ii*60)-1];
         }
+
+     //   ob_start();
+     //   var_dump($ranges);
+     //   $this->logger->info("PayU CRON Time Ranges" . ob_get_clean());
+
 
         foreach ($ranges as $v) {
             if( (($v[0] <= $minutes_created) && ($minutes_created <= $v[1]))  && (!(($v[0]  <= $minutes_updated) && ($minutes_updated <= $v[1]))) ) {
@@ -349,7 +384,7 @@ class CheckTransactionState
             return true;
         }
 
-        $this->logger->info("Check Not Needed");
+        $this->logger->info("($this->process_id) Check Not Needed");
 
         return false;
 
@@ -379,18 +414,24 @@ class CheckTransactionState
         return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
     }
 
-
+    public function getCRONConfigData($field, $storeId = null)
+    {
+        $path = 'payment/payumea_cron/' . $field;
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+    }
 
     protected function invoiceAndNotifyCustomer(Order $order)
     {
+
+        $id = $order->getIncrementId();
+
         try {
             $order->setCanSendNewEmailFlag(true);
             $this->orderSender->send($order);
-            $this->logger->info("Can Invoice:" . $order->canInvoice());
+
+            $this->logger->info("($this->process_id) ($id) PayU CRON: can_invoice (initial check): " . $order->canInvoice());
          //   $this->debugData(['info' => $order->canInvoice()]);
             if($order->canInvoice()) {
-                $invoice = $this->_invoiceService->prepareInvoice($order);
-
 
                 /**
                  * 2021/06/16 Double Invoice Correction
@@ -398,13 +439,18 @@ class CheckTransactionState
                  * discard invoice if status changed since start of process
                  */
                 $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
-                $this->logger->info('can_invoice:' .  $order_status_test->canInvoice());
-              //  $this->debugData(['can_invoice' => $order_status_test->canInvoice()]);
+                $this->logger->info('($this->process_id) ($id) PayU CRON: can_invoice (double check): ' .  $order_status_test->canInvoice());
+
                 if(!$order_status_test->canInvoice()) {
                     // Simply just skip this section
                     goto cannot_invoice_marker;
                 }
 
+                $status = $this->OrderConfig->getStateDefaultStatus('processing');
+                $order->setState("processing")->setStatus($status);
+                $order->save();
+
+                $invoice = $this->_invoiceService->prepareInvoice($order);
 
                 $invoice->register();
                 $invoice->save();
@@ -415,34 +461,9 @@ class CheckTransactionState
                 );
                 $transactionService->save();
 
-                $status = $this->OrderConfig->getStateDefaultStatus('processing');
-                $order->setState("processing")->setStatus($status);
-                $order->save();
+                $this->logger->info(" ($this->process_id) ($id) PayU CRON: INVOICED");
+
 
                 $this->invoiceSender->send($invoice);
 
-                //send notification code
-                $order->addStatusHistoryComment(
-                    __('Notified customer about invoice #%1.', $invoice->getId())
-                )
-                    ->setIsCustomerNotified(true)
-                    ->save();
-
-            } else {
-                /**
-                 * Double Invoice Correction
-                 * 2021/06/16
-                 */
-                cannot_invoice_marker:
-                $this->logger->info('Already invoiced, skip');
-            //    $this->debugData(['info' => 'Already invoiced, skip']);
-            }
-
-        } catch (\Exception $e) {
-            throw new LocalizedException("Error encountered while capturing your order");
-        }
-    }
-
-
-
-}
+                /

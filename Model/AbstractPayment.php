@@ -735,12 +735,21 @@ abstract class AbstractPayment extends AbstractPayU
      */
     protected function invoiceAndNotifyCustomer(Order $order)
     {
+
+        $id = $order->getIncrementId();
+
+        $process_id = $this->_session->getPayUProcessId(uniqid());
+        $process_string = $this->_session->getPayUProcessString(self::class);
+
         try {
             $order->setCanSendNewEmailFlag(true);
             $this->orderSender->send($order);
-            $this->debugData(['info' => $order->canInvoice()]);
+
+            $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice()]);
+            $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice());
+
+
             if($order->canInvoice()) {
-                $invoice = $this->_invoiceService->prepareInvoice($order);
 
                 /**
                  * 2020/10/23 Double Invoice Correction
@@ -748,11 +757,19 @@ abstract class AbstractPayment extends AbstractPayU
                  * discard invoice if status changed since start of process
                  */
                 $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
-                $this->debugData(['can_invoice' => $order_status_test->canInvoice()]);
+                $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order_status_test->canInvoice()]);
+                $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order->canInvoice());
+
                 if(!$order_status_test->canInvoice()) {
                     // Simply just skip this section
                     goto cannot_invoice_marker;
                 }
+
+                $status = $this->OrderConfig->getStateDefaultStatus('processing');
+                $order->setState("processing")->setStatus($status);
+                $order->save();
+
+                $invoice = $this->_invoiceService->prepareInvoice($order);
 
                 $invoice->register();
                 $invoice->save();
@@ -763,9 +780,7 @@ abstract class AbstractPayment extends AbstractPayU
                 );
                 $transactionService->save();
 
-                $status = $this->OrderConfig->getStateDefaultStatus('processing');
-                $order->setState("processing")->setStatus($status);
-                $order->save();
+                $this->_logger->info(" ($process_id) ($id) PayU $process_string: INVOICED");
 
                 $this->invoiceSender->send($invoice);
 
@@ -782,7 +797,9 @@ abstract class AbstractPayment extends AbstractPayU
                  * 2020/10/23
                  */
                 cannot_invoice_marker:
-                $this->debugData(['info' => 'Already invoiced, skip']);
+                $this->debugData(['info' => " ($id) Already invoiced, skip"]);
+                $this->_logger->info(" ($process_id) ($id) PayU $process_string: Already invoiced, skip");
+
             }
 
         } catch (\Exception $e) {
