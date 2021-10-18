@@ -466,4 +466,28 @@ class CheckTransactionState
 
                 $this->invoiceSender->send($invoice);
 
-                /
+                //send notification code
+                $order->addStatusHistoryComment(
+                    __('Notified customer about invoice #%1.', $invoice->getId())
+                )
+                    ->setIsCustomerNotified(true)
+                    ->save();
+
+            } else {
+                /**
+                 * Double Invoice Correction
+                 * 2021/06/16
+                 */
+                cannot_invoice_marker:
+                $this->logger->info('($this->process_id)  ($id) Already invoiced, skip');
+            //    $this->debugData(['info' => 'Already invoiced, skip']);
+            }
+
+        } catch (\Exception $e) {
+            throw new LocalizedException("Error encountered while capturing your order");
+        }
+    }
+
+
+
+}
