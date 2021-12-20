@@ -131,6 +131,10 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      */
     protected $_logger;
 
+
+    /** @var \Magento\Framework\App\Config\ScopeConfigInterface  */
+    protected $_scopeConfig;
+
     /**
      * AbstractAction constructor.
      * @param \Magento\Framework\App\Action\Context $context
@@ -156,7 +160,8 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         \Magento\Quote\Model\QuoteManagement $quoteManagement,
         \PayU\EasyPlus\Model\Error\Code $errorCodes,
         \PayU\EasyPlus\Model\Response\Factory $responseFactory,
-        \Psr\Log\LoggerInterface $logger
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
@@ -166,6 +171,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         $this->_urlHelper = $urlHelper;
         $this->_customerUrl = $customerUrl;
         $this->_errorCodes = $errorCodes;
+        $this->_scopeConfig = $scopeConfig;
 
         parent::__construct($context);
 
@@ -316,6 +322,27 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         $this->_getSession()->unsCheckoutReference();
         $this->_getSession()->unsCheckoutRedirectUrl();
         $this->_getSession()->unsCheckoutOrderIncrementId();
+    }
+
+
+    protected function sendPendingPage(\Magento\Sales\Model\Order $order)
+    {
+        $this->_getCheckoutSession()
+            ->setLastQuoteId($order->getQuoteId())
+            ->setLastSuccessQuoteId($order->getQuoteId());
+
+        $this->_getCheckoutSession()
+            ->setLastOrderId($order->getId())
+            ->setLastRealOrderId($order->getIncrementId())
+            ->setLastOrderStatus($order->getStatus());
+
+        $this->messageManager->addSuccessMessage(
+            __('Your order was placed ann will be processed once payment is validated.')
+        );
+
+        $this->clearSessionData();
+
+        return $this->_redirect('checkout/onepage/success');
     }
 
     protected function sendSuccessPage(\Magento\Sales\Model\Order $order)

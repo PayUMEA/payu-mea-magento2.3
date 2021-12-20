@@ -24,6 +24,15 @@
                 </field>
             </group>
 
+
+            <group id="payumea_redirect_config" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>PayU Redirect Settings</label>
+                <field id="bypass_payu_redirect" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Disable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+
             <group id="payumea_creditcard" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Credit Card</label>
                 <comment>
