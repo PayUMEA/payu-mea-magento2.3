@@ -889,7 +889,7 @@ abstract class AbstractPayment extends AbstractPayU
      * @param Response $response
      * @return void
      */
-    public function declineOrder(Order $order, $message = '', $voidPayment = true, $response)
+    public function declineOrder(Order $order, $message = '', $voidPayment = true, $response = null)
     {
         $payment = $order->getPayment();
         try {

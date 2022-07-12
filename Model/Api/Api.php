@@ -11,6 +11,7 @@
 
 namespace PayU\EasyPlus\Model\Api;
 
+use Magento\Framework\Encryption\EncryptorInterface;
 use PayU\EasyPlus\Model\AbstractPayment;
 use Psr\Log\LoggerInterface;
 use PayU\EasyPlus\Model\Response\Factory;
@@ -59,16 +60,18 @@ class Api extends \Magento\Framework\DataObject
     protected $wsdlUrl;
     protected $checkoutUrl;
 
+    protected $encryptor;
+
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         Factory $responseFactory,
         LoggerInterface $logger,
+        EncryptorInterface $encryptor,
         array $data = []
     ) {
         $this->scopeConfig = $scopeConfig;
-
         parent::__construct($data);
-
+        $this->encryptor = $encryptor;
         $this->responseFactory = $responseFactory;
         $this->_logger = $logger;
     }
@@ -78,7 +81,11 @@ class Api extends \Magento\Framework\DataObject
      */
     public function getSafeKey()
     {
-        return $this->safeKey;
+        $methodCode = $this->getMethodCode();
+        return $this->encryptor->decrypt($this->scopeConfig->getValue(
+            "payment/{$methodCode}/safe_key",
+            ScopeInterface::SCOPE_STORE)
+        );
     }
 
     /**
@@ -123,7 +130,12 @@ class Api extends \Magento\Framework\DataObject
      */
     public function getPassword()
     {
-        return $this->password;
+        $methodCode = $this->getMethodCode();
+
+        return $this->encryptor->decrypt($this->scopeConfig->getValue(
+            "payment/{$methodCode}/api_password",
+            ScopeInterface::SCOPE_STORE)
+        );
     }
 
     /**
