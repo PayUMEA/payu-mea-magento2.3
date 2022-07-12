@@ -15,8 +15,8 @@
                 <title>Credit Card</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>CREDITCARD</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -37,8 +37,8 @@
                 <title>Payflex</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>PAYFLEX</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -60,8 +60,8 @@
                 <title>eBucks</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>EBUCKS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -81,8 +81,8 @@
                 <title>EFT Pro</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>EFT_PRO</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -102,8 +102,8 @@
                 <title>Discovery Miles</title>
                 <environment>0</environment>
                 <api_username>Staging Integration Store 3</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>DISCOVERYMILES</payment_methods>
                 <redirect_channel>web</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -123,8 +123,8 @@
                 <title>Mobicred</title>
                 <environment>0</environment>
                 <api_username>Staging Integration Store 3</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>MOBICRED</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -144,8 +144,8 @@
                 <title>Ucount</title>
                 <environment>0</environment>
                 <api_username>Staging Integration Store 3</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>UCOUNT</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -166,8 +166,8 @@
                 <title>Rcs</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>RCS</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -188,8 +188,8 @@
                 <title>Rcs Plc</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>Rcs_Plc</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -210,8 +210,8 @@
                 <title>FASTA Instant Credit</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>FASTA</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>500</min_order_total>
@@ -232,8 +232,8 @@
                 <title>MPESA</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>MPESA</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -254,8 +254,8 @@
                 <title>Airtel Money</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>AIRTEL_MONEY</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -276,8 +276,8 @@
                 <title>Mobile Banking</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>MOBILE_BANKING</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -298,8 +298,8 @@
                 <title>MTN MOBILE</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>MTN_MOBILE</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -320,8 +320,8 @@
                 <title>Tigopesa</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>TIGOPESA</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
@@ -342,8 +342,8 @@
                 <title>Equitel</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
-                <api_password>WSAUFbw6</api_password>
-                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <api_password>0:3:TZxJKEJvAzU2yTIhtN7JpDyOHUzynWnE9B3ERBWC8omwKKOV</api_password>
+                <safe_key>0:3:wtdnCWgWwZxfM3HAigXLCWcYJK76n/rlVIzloa1ZsubzBXfIRHNF8s6Hv2VBiLZPW+9ZFcxDlw0tnoqGYQSjCuUe</safe_key>
                 <payment_methods>EQUITEL</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
                 <min_order_total>1</min_order_total>
