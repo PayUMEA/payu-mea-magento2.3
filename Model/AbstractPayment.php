@@ -691,7 +691,7 @@ abstract class AbstractPayment extends AbstractPayU
         } catch (\Exception $e) {
             //decline the order (in case of wrong response code) but don't return money to customer.
             $message = $e->getMessage();
-            $this->declineOrder($order, $message, false, $response);
+            $this->declineOrder($order, $response, false, $message);
             throw $e;
         }
 
@@ -720,7 +720,7 @@ abstract class AbstractPayment extends AbstractPayU
                 'Something went wrong: the paid amount does not match the order amount.'
                 . ' Please correct this and try again.'
             );
-            $this->declineOrder($order, $message, true, $response);
+            $this->declineOrder($order, $response, true, $message);
             throw new LocalizedException($message);
         }
 
@@ -884,12 +884,12 @@ abstract class AbstractPayment extends AbstractPayU
      * Register order cancellation. Return money to customer if needed.
      *
      * @param Order $order
-     * @param string $message
-     * @param bool $voidPayment
      * @param Response $response
+     * @param bool $voidPayment
+     * @param string $message
      * @return void
      */
-    public function declineOrder(Order $order, $message = '', $voidPayment = true, $response)
+    public function declineOrder(Order $order, Response $response, bool $voidPayment = true, string $message = '')
     {
         $payment = $order->getPayment();
         try {
