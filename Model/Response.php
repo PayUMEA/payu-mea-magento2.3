@@ -148,7 +148,7 @@ class Response extends DataObject
             return true;
         } else {
             $message = $response->getDisplayMessage();
-            $payment->getMethodInstance()->declineOrder($order, $message, true, $response);
+            $payment->getMethodInstance()->declineOrder($order, $response, true, $message);
 
             return $message;
         }
@@ -159,7 +159,7 @@ class Response extends DataObject
      *
      * @param Order $order
      */
-    public function processCancel($order)
+    public function processCancel(Order $order)
     {
         $payment = $order->getPayment();
         $payment->getMethodInstance()->processCancellation($this->getParams());
