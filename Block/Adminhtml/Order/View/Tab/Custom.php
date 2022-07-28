@@ -35,12 +35,12 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        array $data = [],
-        \Magento\Framework\Data\Form\FormKey $formKey
+        \Magento\Framework\Data\Form\FormKey $formKey,
+        array $data = []
     ) {
         $this->coreRegistry = $registry;
-        parent::__construct($context, $data);
         $this->formKey = $formKey;
+        parent::__construct($context, $data);
     }
 
     /**
