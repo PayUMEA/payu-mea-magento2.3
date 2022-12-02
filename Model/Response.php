@@ -57,6 +57,16 @@ class Response extends DataObject
 
     }
 
+    /**
+     * @return bool
+     */
+    public function isPaymentProcessing()
+    {
+        return $this->getReturn()->successful
+            && $this->getTransactionState() == AbstractPayU::TRANS_STATE_PROCESSING;
+
+    }
+
 
     public function getTranxId()
     {

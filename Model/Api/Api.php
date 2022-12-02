@@ -376,6 +376,8 @@ class Api extends \Magento\Framework\DataObject
             $to->setIsTransactionApproved(true);
         } else if ($from->isPaymentPending()) {
             $to->setIsTransactionPending(true);
+        } else if ($from->isPaymentProcessing()) {
+            $to->setIsTransactionProcessing(true);
         } else {
             $to->setIsTransactionDenied(true);
         }

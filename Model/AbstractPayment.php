@@ -316,8 +316,9 @@ abstract class AbstractPayment extends AbstractPayU
 
         $state = $this->getResponse()->getTransactionState();
 
-        switch ($this->getResponse()->getTransactionState()) {
+        switch ($state) {
             case self::TRANS_STATE_SUCCESSFUL:
+            case self::TRANS_STATE_PROCESSING:
             case self::TRANS_STATE_AWAITING_PAYMENT:
                 return true;
             case self::TRANS_STATE_FAILED:
@@ -626,7 +627,6 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function process($params)
     {
-        //$this->_debug(['response' => $responseData]);
         $response = $this->_easyPlusApi->doGetTransaction($params, $this);
         $this->setResponseData($response->getReturn());
 
