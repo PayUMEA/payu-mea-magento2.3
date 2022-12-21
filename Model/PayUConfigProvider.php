@@ -96,6 +96,6 @@ class PayUConfigProvider implements ConfigProviderInterface
      */
     public function getPaymentMethodImageUrl($code)
     {
-        return $this->assetRepo->getUrl( 'PayU_EasyPlus::images/' . $code . '.png');
+        return $this->assetRepo->getUrl('PayU_EasyPlus::images/' . $code . '.png');
     }
 }

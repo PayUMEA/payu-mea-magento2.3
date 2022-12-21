@@ -36,7 +36,8 @@ class Method implements \Magento\Framework\Option\ArrayInterface
 		'AIRTEL_MONEY'		=> 'AIRTEL MONEY',
 		'MOBILE_BANKING'	=> 'MOBILE BANKING',
 		'MTN_MOBILE'		=> 'MTN MOBILE',
-		'TIGOPESA'			=> 'TIGOPESA'
+		'TIGOPESA'			=> 'TIGOPESA',
+        'MORETYME'          => 'MoreTyme'
 	);
 
 	/**
