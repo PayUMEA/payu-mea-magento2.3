@@ -43,6 +43,7 @@ class PayUConfigProvider implements ConfigProviderInterface
         Tigopesa::CODE,
         Equitel::CODE,
         Payflex::CODE,
+        MoreTyme::CODE,
     ];
 
     /**
