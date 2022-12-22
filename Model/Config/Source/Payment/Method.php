@@ -13,59 +13,59 @@ namespace PayU\EasyPlus\Model\Config\Source\Payment;
 
 class Method implements \Magento\Framework\Option\ArrayInterface
 {
-	// Load PayU payment methods
-	protected $payments = array(
-		'CREDITCARD' 		=> 'Credit Card',
-		'PAYFLEX' 		    => 'Payflex',
-		'CREDITCARD_PAYU' 	=> 'Credit Card (PayU)',
-		'LOYALTY' 			=> 'Loyalty',
-		'WALLET' 			=> 'Wallet',
-		'WALLET_PAYU' 		=> 'Wallet (PayU)',
-		'DISCOVERYMILES' 	=> 'Discovery Miles',
-		'GLOBALPAY' 		=> 'Global Pay',
-		'DEBITCARD' 		=> 'Debit Card',
-		'EBUCKS' 			=> 'eBucks',
-		'PAYPAL' 			=> 'Paypal',
-		'EFT' 				=> 'EFT',
-		'EFT_PRO' 			=> 'EFT Pro',
-		'MASTERPASS' 		=> 'Master Pass',
-		'RCS_PLC' 			=> 'RCS PLC',
-		'RCS'				=> 'RCS',
-		'FASTA'				=> 'FASTA Instant Credit',
-		'MPESA'				=> 'MPESA',
-		'AIRTEL_MONEY'		=> 'AIRTEL MONEY',
-		'MOBILE_BANKING'	=> 'MOBILE BANKING',
-		'MTN_MOBILE'		=> 'MTN MOBILE',
-		'TIGOPESA'			=> 'TIGOPESA',
+    // Load PayU payment methods
+    protected $payments = [
+        'CREDITCARD' 		=> 'Credit Card',
+        'PAYFLEX' 		    => 'Payflex',
+        'CREDITCARD_PAYU' 	=> 'Credit Card (PayU)',
+        'LOYALTY' 			=> 'Loyalty',
+        'WALLET' 			=> 'Wallet',
+        'WALLET_PAYU' 		=> 'Wallet (PayU)',
+        'DISCOVERYMILES' 	=> 'Discovery Miles',
+        'GLOBALPAY' 		=> 'Global Pay',
+        'DEBITCARD' 		=> 'Debit Card',
+        'EBUCKS' 			=> 'eBucks',
+        'PAYPAL' 			=> 'Paypal',
+        'EFT' 				=> 'EFT',
+        'EFT_PRO' 			=> 'EFT Pro',
+        'MASTERPASS' 		=> 'Master Pass',
+        'RCS_PLC' 			=> 'RCS PLC',
+        'RCS'				=> 'RCS',
+        'FASTA'				=> 'FASTA Instant Credit',
+        'MPESA'				=> 'MPESA',
+        'AIRTEL_MONEY'		=> 'AIRTEL MONEY',
+        'MOBILE_BANKING'	=> 'MOBILE BANKING',
+        'MTN_MOBILE'		=> 'MTN MOBILE',
+        'TIGOPESA'			=> 'TIGOPESA',
         'MORETYME'          => 'MoreTyme'
-	);
+    ];
 
-	/**
-	 * Options getter
-	 *
-	 * @return array
-	 */
-	public function toOptionArray()
-	{
-		$payments_array = array();
-		foreach ($this->payments as $key => $value ) {
-			$payments_array[] = array( 'value' => $key, 'label' => $value );
-		}
+    /**
+     * Options getter
+     *
+     * @return array
+     */
+    public function toOptionArray()
+    {
+        $payments_array = [];
+        foreach ($this->payments as $key => $value) {
+            $payments_array[] = [ 'value' => $key, 'label' => $value ];
+        }
 
-		return $payments_array;
-	}
+        return $payments_array;
+    }
 
-	/**
+    /**
      * Get options in "key-value" format
      *
      * @return array
      */
     public function toArray()
     {
-    	$payments_array = array();
-    	foreach ($this->payments as $key => $value ) {
-			$payments_array[$key] = $value ;
-		}
-		return $payments_array;
+        $payments_array = [];
+        foreach ($this->payments as $key => $value) {
+            $payments_array[$key] = $value;
+        }
+        return $payments_array;
     }
 }
