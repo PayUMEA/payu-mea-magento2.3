@@ -78,6 +78,10 @@ define(
             {
                 type: 'payumea_equitel',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/equitel-method'
+            },
+            {
+                type: 'payumea_moretyme',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/moretyme-method'
             }
         );
         /** Add view logic here if needed */
