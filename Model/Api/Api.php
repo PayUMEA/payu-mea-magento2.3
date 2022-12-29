@@ -253,20 +253,6 @@ class Api extends \Magento\Framework\DataObject
         return $header;
     }
 
-
-    public function doCheckTransaction($reference)
-    {
-        $soapClient = $this->getSoapSingleton();
-
-
-
-       // $result = $soapClient->getTransaction($data);
-
-        //$result = json_decode(json_encode($result));
-
-    }
-
-
     public function checkTransaction($reference)
     {
         $soapClient = $this->getSoapSingleton();

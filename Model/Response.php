@@ -11,10 +11,12 @@
 
 namespace PayU\EasyPlus\Model;
 
-use Magento\Sales\Model\Order;
-use PayU\EasyPlus\Model\Error\Code;
-use PayU\EasyPlus\Model\Api\Factory;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order;
+use PayU\EasyPlus\Model\Api\Factory;
+use PayU\EasyPlus\Model\Error\Code;
+
 /**
  * Class Response
  *
@@ -22,19 +24,19 @@ use Magento\Framework\DataObject;
  */
 class Response extends DataObject
 {
-	protected $errorCode;
-	protected $api;
+    protected $errorCode;
+    protected $api;
 
-	public function __construct(
+    public function __construct(
         Code $errorCodes,
         Factory $apiFactory,
-        array $data = array()
-	) {
-		$this->errorCode = $errorCodes;
-		$this->api = $apiFactory->create();
+        array $data = []
+    ) {
+        $this->errorCode = $errorCodes;
+        $this->api = $apiFactory->create();
 
-		parent::__construct($data);
-	}
+        parent::__construct($data);
+    }
 
     public function getReturn()
     {
@@ -52,9 +54,8 @@ class Response extends DataObject
      */
     public function isPaymentPending()
     {
-         return $this->getReturn()->successful
+        return $this->getReturn()->successful
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_AWAITING_PAYMENT;
-
     }
 
     /**
@@ -64,9 +65,7 @@ class Response extends DataObject
     {
         return $this->getReturn()->successful
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_PROCESSING;
-
     }
-
 
     public function getTranxId()
     {
@@ -105,12 +104,17 @@ class Response extends DataObject
 
     public function getTotalCaptured()
     {
-        return ($this->getReturn()->paymentMethodsUsed->amountInCents / 100);
+        $paymentMethod = $this->getReturn()->paymentMethodsUsed;
+
+        if (!$paymentMethod) {
+            $paymentMethod = $this->getReturn()->basket;
+        }
+
+        return ($paymentMethod->amountInCents / 100);
     }
 
     public function getDisplayMessage()
     {
-
         return $this->getReturn()->displayMessage;
     }
 
@@ -152,7 +156,7 @@ class Response extends DataObject
             $this->api->importPaymentInfo($response, $payment);
 
             return true;
-        } else if ($response->isPaymentPending()) {
+        } elseif ($response->isPaymentPending()) {
             $this->api->importPaymentInfo($response, $payment);
 
             return true;
@@ -168,6 +172,7 @@ class Response extends DataObject
      * Process user payment cancellation
      *
      * @param Order $order
+     * @throws LocalizedException
      */
     public function processCancel(Order $order)
     {
@@ -180,6 +185,7 @@ class Response extends DataObject
      *
      * @param array $data
      * @param Order $order
+     * @throws LocalizedException
      */
     public function processNotify($data, $order)
     {

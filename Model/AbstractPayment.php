@@ -11,17 +11,17 @@
 
 namespace PayU\EasyPlus\Model;
 
-use PayU\EasyPlus\Helper\Data as FrontendHelper;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\InfoInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
-use Magento\Sales\Model\Order\Payment\Transaction;
+use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
+use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
-use Magento\Framework\DataObject;
-use Magento\Quote\Api\Data\CartInterface;
-use Magento\Sales\Api\Data\TransactionInterface;
+use Magento\Sales\Model\Order\Payment\Transaction;
+use PayU\EasyPlus\Helper\Data as FrontendHelper;
 
 /**
  * Redirect payment method model for all payment methods except Discovery Miles
@@ -89,7 +89,7 @@ abstract class AbstractPayment extends AbstractPayU
     protected $_minAmount                   = null;
     protected $_maxAmount                   = null;
     protected $_redirectUrl                 = '';
-    protected $_supportedCurrencyCodes      = array( 'NGN', 'ZAR', 'KES', 'TZS', 'ZMW', 'USD');
+    protected $_supportedCurrencyCodes      = [ 'NGN', 'ZAR', 'KES', 'TZS', 'ZMW', 'USD'];
 
     /**
      * Fields that should be replaced in debug with '***'
@@ -166,7 +166,7 @@ abstract class AbstractPayment extends AbstractPayU
         \Magento\Framework\DB\Transaction $transaction,
         \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
         \Magento\Sales\Model\Order\Config $OrderConfig,
-        array $data = array()
+        array $data = []
     ) {
         parent::__construct(
             $context,
@@ -216,6 +216,7 @@ abstract class AbstractPayment extends AbstractPayU
     public function setStore($store)
     {
         $this->setData('store', $store);
+
         if (null === $store) {
             $store = $this->_storeManager->getStore()->getId();
             $this->setData('store', $store);
@@ -241,7 +242,7 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function getResponse()
     {
-        if(null === $this->_response) {
+        if (null === $this->_response) {
             $this->_response = $this->_responseFactory->create();
         }
 
@@ -270,8 +271,9 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function getValue($key, $storeId = null)
     {
-        if(in_array($key, ['safe_key', 'api_password']))
+        if (in_array($key, ['safe_key', 'api_password'])) {
             return $this->_encryptor->decrypt($this->getConfigData($key, $storeId));
+        }
 
         return $this->getConfigData($key, $storeId);
     }
@@ -297,7 +299,6 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function canUseForCurrency($currencyCode)
     {
-
         if (!in_array($currencyCode, $this->_supportedCurrencyCodes)) {
             return false;
         }
@@ -313,7 +314,6 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function checkResponseCode()
     {
-
         $state = $this->getResponse()->getTransactionState();
 
         switch ($state) {
@@ -347,6 +347,7 @@ abstract class AbstractPayment extends AbstractPayU
                 __('Payment verification error: invalid PayU reference')
             );
         }
+
         return true;
     }
 
@@ -377,7 +378,7 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Setup transaction before redirect
      *
-     * @param DataObject| InfoInterface| Payment $payment
+     * @param InfoInterface $payment
      * @param float $amount
      * @return $this
      * @throws LocalizedException
@@ -387,7 +388,7 @@ abstract class AbstractPayment extends AbstractPayU
         $response = null;
         $this->validateAmount($amount);
 
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var Order $order */
         $order = $payment->getOrder();
         $order->setCanSendNewEmailFlag(false);
         $payment->setBaseAmountOrdered($order->getBaseTotalDue());
@@ -398,14 +399,12 @@ abstract class AbstractPayment extends AbstractPayU
         $request = $this->generateRequestFromOrder($order, $helper);
 
         try {
-
             $response = $this->_easyPlusApi->doSetTransaction($request->getData());
 
             $this->debugData(['request' => $request->getData()]);
             $this->debugData(['response' => $response]);
 
-
-            if($response->return->successful) {
+            if ($response->return->successful) {
                 $payUReference = $response->return->payUReference;
 
                 // set PayU session variables
@@ -429,8 +428,8 @@ abstract class AbstractPayment extends AbstractPayU
                     $payUReference
                 );
 
-                $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
-                    ->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+                $order->setState(Order::STATE_PENDING_PAYMENT)
+                    ->setStatus(Order::STATE_PENDING_PAYMENT);
                 $order->addStatusHistoryComment($message);
 
                 $payment->setSkipOrderProcessing(true);
@@ -449,6 +448,8 @@ abstract class AbstractPayment extends AbstractPayU
 
         return $this;
     }
+
+
 
     /**
      * Process order cancellation
@@ -500,12 +501,7 @@ abstract class AbstractPayment extends AbstractPayU
         }
 
         if ($isError) {
-
-
-
-
-
-            $responseText = $this->_dataFactory->create('frontend')->wrapGatewayError( "safddgdgsf" /* $response->getResultMessage() */);
+            $responseText = $this->_dataFactory->create('frontend')->wrapGatewayError("safddgdgsf" /* $response->getResultMessage() */);
             $responseText = $responseText
                 ? $responseText
                 : __('This payment didn\'t work out because we can\'t find this order.');
@@ -523,8 +519,9 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function processNotification($data, $order)
     {
-        if($order->getState() == strtolower(AbstractPayU::TRANS_STATE_PROCESSING))
+        if ($order->getState() == strtolower(AbstractPayU::TRANS_STATE_PROCESSING)) {
             return;
+        }
 
         $payuReference = $data['PayUReference'];
         $response = $this->_easyPlusApi->doGetTransaction($payuReference, $this);
@@ -532,16 +529,15 @@ abstract class AbstractPayment extends AbstractPayU
 
         $transactionNotes = "<strong>-----PAYU NOTIFICATION RECEIVED---</strong><br />";
         //Checking the response from the SOAP call to see if IPN is valid
-        if(isset($resultCode) && (!in_array($resultCode, array('POO5', 'EFTPRO_003', '999', '305')))) {
-
-            if(isset($data['TransactionState'])
-                && (in_array($data['TransactionState'],  array('PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED')))
+        if (isset($resultCode) && (!in_array($resultCode, ['POO5', 'EFTPRO_003', '999', '305']))) {
+            if (isset($data['TransactionState'])
+                && (in_array($data['TransactionState'], ['PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED']))
             ) {
                 $amountBasket = $data['Basket']['AmountInCents'] / 100;
                 $amountPaid = isset($data['PaymentMethodsUsed']['Creditcard']['AmountInCents'])
                     ? $data['PaymentMethodsUsed']['Creditcard']['AmountInCents'] / 100 : '';
 
-                if(empty($amountPaid)) {
+                if (empty($amountPaid)) {
                     $amountPaid = isset($data['PaymentMethodsUsed']['Eft']['AmountInCents']) ?
                         $data['PaymentMethodsUsed']['Eft']['AmountInCents'] / 100 : 'N/A';
                 }
@@ -550,19 +546,20 @@ abstract class AbstractPayment extends AbstractPayU
                 $transactionNotes .= "Amount Paid: " . $amountPaid . "<br />";
                 $transactionNotes .= "Merchant Reference : " . $data['MerchantReference'] . "<br />";
                 $transactionNotes .= "PayU Reference: " . $payuReference . "<br />";
-                $transactionNotes .= "PayU Payment Status: ". $data["TransactionState"]."<br /><br />";
+                $transactionNotes .= "PayU Payment Status: " . $data["TransactionState"] . "<br /><br />";
 
                 $paymentMethod = isset($data['PaymentMethodsUsed']['Creditcard']) ?
                     $data['PaymentMethodsUsed']['Creditcard'] : '';
 
-                if(empty($paymentMethod))
+                if (empty($paymentMethod)) {
                     $paymentMethod = isset($data['PaymentMethodsUsed']['Eft']) ? $data['PaymentMethodsUsed']['Eft'] : '';
+                }
 
-                if(!empty($paymentMethod)) {
-                    if(is_array($paymentMethod)) {
+                if (!empty($paymentMethod)) {
+                    if (is_array($paymentMethod)) {
                         $transactionNotes .= "<strong>Payment Method Details:</strong>";
-                        foreach($paymentMethod as $key => $value) {
-                            $transactionNotes .= "<br />&nbsp;&nbsp;- ".$key.":".$value." , ";
+                        foreach ($paymentMethod as $key => $value) {
+                            $transactionNotes .= "<br />&nbsp;&nbsp;- " . $key . ":" . $value . " , ";
                         }
                     }
                 }
@@ -578,22 +575,21 @@ abstract class AbstractPayment extends AbstractPayU
                     case 'TIMEOUT':
                     case 'EXPIRED':
                         $order->registerCancellation($transactionNotes);
-						$order->save();
+                        $this->_orderRepository->save($order);
                         break;
                     case 'AWAITING_PAYMENT':
                     case 'PROCESSING':
                         $order->addStatusHistoryComment($transactionNotes, true);
-						$order->save();
+                        $this->_orderRepository->save($order);
                         break;
                     default:
                         $order->addStatusHistoryComment($transactionNotes, true);
-						$order->save();
+                        $this->_orderRepository->save($order);
                     break;
                 }
 
                 $this->debugData(['info' => 'PayU IPN Processing complete.', 'response' => $data]);
             } else {
-
                 $transactionNotes = '<strong>Payment unsuccessful: </strong><br />';
                 $transactionNotes .= "PayU Reference: " . $response->getTranxId() . "<br />";
                 $transactionNotes .= "Point Of Failure: " . $response->getPointOfFailure() . "<br />";
@@ -605,7 +601,6 @@ abstract class AbstractPayment extends AbstractPayU
                 $this->debugData(['info' => 'PayU payment Failed. Payment status unknown']);
             }
         } else {
-
             $transactionNotes = '<strong>Payment unsuccessful: </strong><br />';
             $transactionNotes .= "PayU Reference: " . $response->getTranxId() . "<br />";
             $transactionNotes .= "Point Of Failure: " . $response->getPointOfFailure() . "<br />";
@@ -646,7 +641,7 @@ abstract class AbstractPayment extends AbstractPayU
                 );
             }
             if ($order->getId()) {
-                try{
+                try {
                     // Everything looks good, so capture order
                     $this->captureOrderAndPayment($order);
                 } catch (LocalizedException $exception) {
@@ -654,7 +649,6 @@ abstract class AbstractPayment extends AbstractPayU
                 } catch (\Exception $exception) {
                     $test = 1;
                 }
-
             } else {
                 $isError = true;
             }
@@ -704,14 +698,11 @@ abstract class AbstractPayment extends AbstractPayU
         $this->processPaymentFraudStatus($payment);
         $this->addStatusCommentOnUpdate($payment, $response);
 
-
         // Here we must do something to check for a Pending request
-        if($payment->getIsTransactionPending()) {
+        if ($payment->getIsTransactionPending()) {
             $order->save();
             return;
         }
-
-
 
         // match amounts. should be equal for capturing order.
         // decline the order if amount does not match.
@@ -735,7 +726,6 @@ abstract class AbstractPayment extends AbstractPayU
      */
     protected function invoiceAndNotifyCustomer(Order $order)
     {
-
         $id = $order->getIncrementId();
 
         $process_id = $this->_session->getPayUProcessId(uniqid());
@@ -748,8 +738,7 @@ abstract class AbstractPayment extends AbstractPayU
             $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice()]);
             $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice());
 
-
-            if($order->canInvoice()) {
+            if ($order->canInvoice()) {
 
                 /**
                  * 2020/10/23 Double Invoice Correction
@@ -760,7 +749,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order_status_test->canInvoice()]);
                 $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order->canInvoice());
 
-                if(!$order_status_test->canInvoice()) {
+                if (!$order_status_test->canInvoice()) {
                     // Simply just skip this section
                     goto cannot_invoice_marker;
                 }
@@ -790,7 +779,6 @@ abstract class AbstractPayment extends AbstractPayU
                 )
                     ->setIsCustomerNotified(true)
                     ->save();
-
             } else {
                 /**
                  * Double Invoice Correction
@@ -799,9 +787,7 @@ abstract class AbstractPayment extends AbstractPayU
                 cannot_invoice_marker:
                 $this->debugData(['info' => " ($id) Already invoiced, skip"]);
                 $this->_logger->info(" ($process_id) ($id) PayU $process_string: Already invoiced, skip");
-
             }
-
         } catch (\Exception $e) {
             throw new LocalizedException("Error encountered while capturing your order");
         }
@@ -830,7 +816,7 @@ abstract class AbstractPayment extends AbstractPayU
             $payment->setIsTransactionPending(true);
         }
 
-        if($response->isFraudDetected()) {
+        if ($response->isFraudDetected()) {
             $payment->setIsFraudDetected(true);
         }
     }
@@ -989,7 +975,8 @@ abstract class AbstractPayment extends AbstractPayU
      * @param Payment $payment
      * @param DataObject $response
      */
-    protected function addStatusCommentOnUpdate(Payment $payment, DataObject $response) {
+    protected function addStatusCommentOnUpdate(Payment $payment, DataObject $response)
+    {
         $transactionId = $response->getTranxId();
 
         if ($payment->getIsTransactionApproved()) {
@@ -1003,7 +990,6 @@ abstract class AbstractPayment extends AbstractPayU
 
             $test = 1;
         } elseif ($payment->getIsTransactionPending()) {
-
             $message = __(
                 'Transaction %1 is pending payment. Amount %2. Transaction status is "%3"',
                 $transactionId,
@@ -1011,7 +997,6 @@ abstract class AbstractPayment extends AbstractPayU
                 $response->getTransactionState()
             );
             $payment->getOrder()->addStatusHistoryComment($message);
-
         } elseif ($payment->getIsTransactionDenied()) {
             $message = __(
                 'Transaction %1 has been voided/declined. Transaction status is "%2". Amount %3.',
