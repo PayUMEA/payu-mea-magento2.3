@@ -40,7 +40,7 @@ class MoreTyme extends AbstractPayment
      * @return $this
      * @throws LocalizedException
      */
-    public function order(InfoInterface $payment, $amount): static
+    public function order(InfoInterface $payment, $amount)
     {
         $payURedirect = $this->_session->getCheckoutRedirectUrl();
 

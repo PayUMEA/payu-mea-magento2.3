@@ -308,10 +308,8 @@ class Request extends DataObject
      * @param AbstractPayment $paymentMethod
      * @return $this
      */
-    public function setDataFromOrder(
-        Order $order,
-        AbstractPayment $paymentMethod
-    ): static {
+    public function setDataFromOrder(Order $order, AbstractPayment $paymentMethod)
+    {
         $this->setData(
             'Basket',
             [
