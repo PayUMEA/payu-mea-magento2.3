@@ -13,26 +13,26 @@ namespace PayU\EasyPlus\Model\System\Config\Source\Payment;
 
 class Gateway implements \Magento\Framework\Option\ArrayInterface
 {
-	/**
-	 * Options getter
-	 *
-	 * @return array
-	 */
-	public function toOptionArray()
-	{
-		return array(
-            array(
+    /**
+     * Options getter
+     *
+     * @return array
+     */
+    public function toOptionArray()
+    {
+        return [
+            [
                 'value' => '0',
                 'label' => __('Sandbox (testing)')
-            ),
-            array(
+            ],
+            [
                 'value' => '1',
                 'label' => __('Live (real)')
-            )
-        );
-	}
+            ]
+        ];
+    }
 
-	/**
+    /**
      * Get options in "key-value" format
      *
      * @return array

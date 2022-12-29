@@ -6,8 +6,8 @@
  */
 namespace PayU\EasyPlus\Controller\Payment;
 
-use PayU\EasyPlus\Controller\AbstractAction;
 use Magento\Framework\Controller\ResultFactory;
+use PayU\EasyPlus\Controller\AbstractAction;
 
 class Redirect extends AbstractAction
 {
@@ -20,10 +20,12 @@ class Redirect extends AbstractAction
         /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
-        try {    
+        try {
             $url = $this->_getSession()->getCheckoutRedirectUrl();
-            if($url) {
+
+            if ($url) {
                 $this->_getSession()->unsCheckoutRedirectUrl();
+
                 return $resultRedirect->setPath($url);
             } else {
                 $this->messageManager->addErrorMessage(

@@ -30,7 +30,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_creditcard>
-
             <payumea_payflex>
                 <model>PayU\EasyPlus\Model\Payflex</model>
                 <active>0</active>
@@ -52,8 +51,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_payflex>
-
-
             <payumea_ebucks>
                 <model>PayU\EasyPlus\Model\Ebucks</model>
                 <active>0</active>
@@ -159,7 +156,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_ucount>
-
             <payumea_rcs>
                 <model>PayU\EasyPlus\Model\Rcs</model>
                 <active>0</active>
@@ -181,7 +177,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_rcs>
-
             <payumea_rcs_plc>
                 <model>PayU\EasyPlus\Model\RcsPlc</model>
                 <active>0</active>
@@ -203,7 +198,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_rcs_plc>
-
             <payumea_fasta>
                 <model>PayU\EasyPlus\Model\Fasta</model>
                 <active>0</active>
@@ -225,7 +219,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_fasta>
-
             <payumea_mpesa>
                 <model>PayU\EasyPlus\Model\Mpesa</model>
                 <active>0</active>
@@ -247,7 +240,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_mpesa>
-
             <payumea_airtel_money>
                 <model>PayU\EasyPlus\Model\AirtelMoney</model>
                 <active>0</active>
@@ -269,7 +261,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_airtel_money>
-
             <payumea_mobile_banking>
                 <model>PayU\EasyPlus\Model\MobileBanking</model>
                 <active>0</active>
@@ -291,7 +282,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_mobile_banking>
-
             <payumea_mtn_mobile>
                 <model>PayU\EasyPlus\Model\MtnMobile</model>
                 <active>0</active>
@@ -313,7 +303,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_mtn_mobile>
-
             <payumea_tigopesa>
                 <model>PayU\EasyPlus\Model\Tigopesa</model>
                 <active>0</active>
@@ -335,7 +324,6 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_tigopesa>
-
             <payumea_equitel>
                 <model>PayU\EasyPlus\Model\Equitel</model>
                 <active>0</active>
@@ -357,6 +345,28 @@
                     <cancel_url>payu_easyplus/payment/cancel</cancel_url>
                 </payment_url>
             </payumea_equitel>
+            <payumea_moretyme>
+                <model>PayU\EasyPlus\Model\MoreTyme</model>
+                <active>0</active>
+                <title>MoreTyme</title>
+                <environment>0</environment>
+                <api_username>200021</api_username>
+                <api_password>WSAUFbw6</api_password>
+                <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
+                <payment_methods>MORETYME</payment_methods>
+                <redirect_channel>responsive</redirect_channel>
+                <min_order_total>1</min_order_total>
+                <max_order_total>5000000</max_order_total>
+                <sort_order>101</sort_order>
+                <developer>
+                    <active>0</active>
+                </developer>
+                <payment_url>
+                    <notification_url>payu_easyplus/payment/notify</notification_url>
+                    <return_url>payu_easyplus/payment/response</return_url>
+                    <cancel_url>payu_easyplus/payment/cancel</cancel_url>
+                </payment_url>
+            </payumea_moretyme>
         </payment>
     </default>
 </config>
