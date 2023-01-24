@@ -9,7 +9,7 @@
         "payu magento 2.3"
     ],
     "type": "magento2-module",
-    "version": "1.0.15",
+    "version": "1.0.18",
     "homepage": "https://payu.co.za/",
     "license": [
         "OSL-3.0",
@@ -18,7 +18,7 @@
     "authors": [
         {
             "name": "Kenneth Onah",
-            "homepage": "https://github.com/onahkenneth/module-payu-mea-magento2/contributors"
+            "homepage": "https://github.com/onahkenneth"
         },
         {
             "name": "NetMechanic",
