@@ -574,7 +574,7 @@ abstract class AbstractPayment extends AbstractPayU
                     case 'FAILED':
                     case 'TIMEOUT':
                     case 'EXPIRED':
-                        $order->registerCancellation($transactionNotes);
+                        $order->cancel();
                         $this->_orderRepository->save($order);
                         break;
                     case 'AWAITING_PAYMENT':
