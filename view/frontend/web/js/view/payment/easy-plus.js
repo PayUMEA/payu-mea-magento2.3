@@ -82,6 +82,10 @@ define(
             {
                 type: 'payumea_moretyme',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/moretyme-method'
+            },
+            {
+                type: 'payumea_capitec_pay',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/capitec_pay-method'
             }
         );
         /** Add view logic here if needed */
