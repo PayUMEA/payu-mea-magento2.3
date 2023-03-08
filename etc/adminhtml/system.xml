@@ -1463,6 +1463,90 @@
                     </field>
                 </group>
             </group>
+            <group id="payumea_capitec_pay" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>PayU Capitec Pay</label>
+                <comment>
+                    <![CDATA[<a href="https://southafrica.payu.com/" target="_blank">Click here to sign up for PayU account</a>]]>
+                </comment>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Title</label>
+                    <comment>Title to be displayed in checkout page</comment>
+                </field>
+                <field id="environment" translate="label" type="radios" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Environment</label>
+                    <source_model>PayU\EasyPlus\Model\System\Config\Source\Payment\Gateway</source_model>
+                </field>
+                <field id="api_username" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>API Username</label>
+                    <comment>Title to be displayed in checkout page</comment>
+                </field>
+                <field id="api_password" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>API Password</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="safe_key" translate="label" type="obscure" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Safe Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="payment_action" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Payment Action</label>
+                    <source_model>PayU\EasyPlus\Model\System\Config\Source\Payment\Action</source_model>
+                </field>
+                <field id="order_status" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>New Order Status</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status\NewStatus</source_model>
+                </field>
+                <field id="currency" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Accepted Currency</label>
+                    <source_model>Magento\Config\Model\Config\Source\Locale\Currency</source_model>
+                </field>
+                <field id="payment_methods" translate="label" type="textarea" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment Methods Code</label>
+                    <comment>Enter supported payment method, one per line.</comment>
+                </field>
+                <field id="redirect_channel" translate="label" type="radios" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Redirect Channel</label>
+                    <comment><![CDATA[Only use <strong>Web</strong> if payment method is set to <strong>Discovery Miles</strong>]]></comment>
+                    <source_model>PayU\EasyPlus\Model\System\Config\Source\Redirect\Channel</source_model>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Order Total</label>
+                    <comment>Cannot be less than 1.00</comment>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
+                <field id="max_order_total" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Maximum Order Total</label>
+                    <comment>Cannot be more than 5,000,000.00</comment>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
+                <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
+                    <label>Payment Urls</label>
+                    <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Notification Url (IPN)</label>
+                        <comment>If in doubt, accept the default the value</comment>
+                    </field>
+                    <field id="return_url" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Redirect Url</label>
+                        <comment>If in doubt, accept the default the value</comment>
+                    </field>
+                    <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Cancel Url</label>
+                        <comment>If in doubt, accept the default the value</comment>
+                    </field>
+                </group>
+                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Debugging</label>
+                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enabled</label>
+                        <comment>Debug data is written to debug.log</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+            </group>
         </section>
     </system>
 </config>

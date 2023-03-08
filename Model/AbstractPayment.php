@@ -880,8 +880,9 @@ abstract class AbstractPayment extends AbstractPayU
         $payment = $order->getPayment();
         try {
             if (
-                $voidPayment && $response->getTranxId()
-                && strtoupper($response->getTransactionType()) == self::REQUEST_TYPE_PAYMENT
+                $voidPayment &&
+                $response->getTranxId() &&
+                strtoupper($response->getTransactionType()) == self::REQUEST_TYPE_PAYMENT
             ) {
                 $this->_importToPayment($response, $payment);
                 $this->addStatusCommentOnUpdate($payment, $response);

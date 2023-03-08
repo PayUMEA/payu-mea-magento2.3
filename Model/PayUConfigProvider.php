@@ -44,6 +44,7 @@ class PayUConfigProvider implements ConfigProviderInterface
         Equitel::CODE,
         Payflex::CODE,
         MoreTyme::CODE,
+        CapitecPay::CODE
     ];
 
     /**

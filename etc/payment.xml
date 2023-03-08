@@ -56,5 +56,11 @@
         <method name="payumea_equitel">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="payumea_moretyme">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="payumea_capitec_pay">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
     </methods>
 </payment>
