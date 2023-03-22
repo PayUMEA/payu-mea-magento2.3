@@ -11,13 +11,16 @@
 
 namespace PayU\EasyPlus\Model;
 
+use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Lock\LockManagerInterface;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
+use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -32,6 +35,17 @@ use PayU\EasyPlus\Helper\Data as FrontendHelper;
 abstract class AbstractPayment extends AbstractPayU
 {
     const CODE = '';
+
+    /**
+     * How long to wait for transaction to become unlocked
+     */
+    private const LOCK_TIMEOUT = 3;
+
+    /**
+     * Static lock prefix for locking
+     */
+    private const LOCK_PREFIX = 'PAYU_TXN_';
+
     /**
      * Availability option
      *
@@ -136,9 +150,14 @@ abstract class AbstractPayment extends AbstractPayU
     protected $OrderConfig;
 
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var InvoiceRepositoryInterface
      */
-    protected $_transaction;
+    protected $_invoiceRepository;
+
+    /**
+     * @var LockManagerInterface
+     */
+    protected LockManagerInterface $lockManager;
 
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -163,9 +182,10 @@ abstract class AbstractPayment extends AbstractPayU
         \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
         \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-        \Magento\Framework\DB\Transaction $transaction,
+        \Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository,
         \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
         \Magento\Sales\Model\Order\Config $OrderConfig,
+        LockManagerInterface $lockManager,
         array $data = []
     ) {
         parent::__construct(
@@ -198,8 +218,9 @@ abstract class AbstractPayment extends AbstractPayU
         $this->quoteRepository = $quoteRepository;
         $this->orderSender = $orderSender;
         $this->invoiceSender = $invoiceSender;
-        $this->_transaction = $transaction;
+        $this->_invoiceRepository = $invoiceRepository;
         $this->OrderConfig = $OrderConfig;
+        $this->lockManager = $lockManager;
 
         $this->initializeApi();
 
@@ -438,7 +459,7 @@ abstract class AbstractPayment extends AbstractPayU
             } else {
                 throw new LocalizedException(__('Contacting PayU gateway, error encountered'));
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->debugData(['request' => $request->getData(), 'exception' => $e->getMessage()]);
             $this->debugData(['response' => $response]);
             $this->_logger->error(__('Contacting PayU gateway, error encountered. Reason: ' . $e->getMessage()));
@@ -449,14 +470,12 @@ abstract class AbstractPayment extends AbstractPayU
         return $this;
     }
 
-
-
     /**
      * Process order cancellation
      *
      * @param $params
      * @throws LocalizedException
-     * @throws \Exception
+     * @throws Exception
      */
     public function processCancellation($params)
     {
@@ -515,7 +534,7 @@ abstract class AbstractPayment extends AbstractPayU
      *
      * @param $data
      * @param Order $order
-     * @throws \Exception
+     * @throws Exception
      */
     public function processNotification($data, $order)
     {
@@ -568,7 +587,7 @@ abstract class AbstractPayment extends AbstractPayU
                 switch ($data['TransactionState']) {
                     // Payment completed
                     case 'SUCCESSFUL':
-                        $order->addStatusHistoryComment($transactionNotes);
+                        $order->addCommentToStatusHistory($transactionNotes);
                         $this->invoiceAndNotifyCustomer($order);
                         break;
                     case 'FAILED':
@@ -577,13 +596,8 @@ abstract class AbstractPayment extends AbstractPayU
                         $order->cancel();
                         $this->_orderRepository->save($order);
                         break;
-                    case 'AWAITING_PAYMENT':
-                    case 'PROCESSING':
-                        $order->addStatusHistoryComment($transactionNotes, true);
-                        $this->_orderRepository->save($order);
-                        break;
                     default:
-                        $order->addStatusHistoryComment($transactionNotes, true);
+                        $order->addCommentToStatusHistory($transactionNotes, true);
                         $this->_orderRepository->save($order);
                     break;
                 }
@@ -646,7 +660,7 @@ abstract class AbstractPayment extends AbstractPayU
                     $this->captureOrderAndPayment($order);
                 } catch (LocalizedException $exception) {
                     $test = 1;
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     $test = 1;
                 }
             } else {
@@ -672,7 +686,7 @@ abstract class AbstractPayment extends AbstractPayU
      * @param Order $order
      * @return void
      * @throws LocalizedException
-     * @throws \Exception
+     * @throws Exception
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     protected function captureOrderAndPayment(Order $order)
@@ -682,7 +696,7 @@ abstract class AbstractPayment extends AbstractPayU
         try {
             $this->checkResponseCode();
             $this->checkTransId();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //decline the order (in case of wrong response code) but don't return money to customer.
             $message = $e->getMessage();
             $this->declineOrder($order, $response, false, $message);
@@ -731,6 +745,14 @@ abstract class AbstractPayment extends AbstractPayU
         $process_id = $this->_session->getPayUProcessId(uniqid());
         $process_string = $this->_session->getPayUProcessString(self::class);
 
+        if (!$this->lockManager->lock(self::LOCK_PREFIX . $id, self::LOCK_TIMEOUT)) {
+            $message = "($process_id) ($id) PayU $process_string: could not acquire lock for invoice txn, skipping.";
+            $this->_logger->info($message);
+            $this->debugData(['info' => $message]);
+
+            goto cannot_invoice_marker;
+        }
+
         try {
             $order->setCanSendNewEmailFlag(true);
             $this->orderSender->send($order);
@@ -739,7 +761,6 @@ abstract class AbstractPayment extends AbstractPayU
             $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice());
 
             if ($order->canInvoice()) {
-
                 /**
                  * 2020/10/23 Double Invoice Correction
                  * Force reload order state to check status just before update,
@@ -756,29 +777,28 @@ abstract class AbstractPayment extends AbstractPayU
 
                 $status = $this->OrderConfig->getStateDefaultStatus('processing');
                 $order->setState("processing")->setStatus($status);
-                $order->save();
+                $this->_orderRepository->save($order);
 
-                $invoice = $this->_invoiceService->prepareInvoice($order);
+                if ($this->lockManager->isLocked(self::LOCK_PREFIX . $id)) {
+                    $message = "($process_id) ($id) PayU $process_string: acquired lock for invoice txn";
+                    $this->_logger->info($message);
+                    $this->debugData(['info' => $message]);
 
-                $invoice->register();
-                $invoice->save();
-                $transactionService = $this->_transaction->addObject(
-                    $invoice
-                )->addObject(
-                    $invoice->getOrder()
-                );
-                $transactionService->save();
+                    $invoice = $this->_invoiceService->prepareInvoice($order);
+                    $invoice->register();
+                    $this->_invoiceRepository->save($invoice);
 
-                $this->_logger->info(" ($process_id) ($id) PayU $process_string: INVOICED");
+                    $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: INVOICED"]);
+                    $this->_logger->info(" ($process_id) ($id) PayU $process_string: INVOICED");
 
-                $this->invoiceSender->send($invoice);
+                    $this->invoiceSender->send($invoice);
 
-                //send notification code
-                $order->addStatusHistoryComment(
-                    __('Notified customer about invoice #%1.', $invoice->getId())
-                )
-                    ->setIsCustomerNotified(true)
-                    ->save();
+                    //send notification code
+                    $order->addCommentToStatusHistory(
+                        __('Notified customer about invoice #%1.', $invoice->getId())
+                    )->setIsCustomerNotified(true);
+                    $this->_orderRepository->save($order);
+                }
             } else {
                 /**
                  * Double Invoice Correction
@@ -788,8 +808,10 @@ abstract class AbstractPayment extends AbstractPayU
                 $this->debugData(['info' => " ($id) Already invoiced, skip"]);
                 $this->_logger->info(" ($process_id) ($id) PayU $process_string: Already invoiced, skip");
             }
-        } catch (\Exception $e) {
-            throw new LocalizedException("Error encountered while capturing your order");
+        } catch (Exception $e) {
+            throw new LocalizedException(__("Error encountered while capturing your order"));
+        } finally {
+            $this->lockManager->unlock(self::LOCK_PREFIX . $id);
         }
     }
 
@@ -841,7 +863,7 @@ abstract class AbstractPayment extends AbstractPayU
 
             $payment->setIsFraudDetected(true);
             $payment->setAdditionalInformation('fraud_details', $fraudData);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //this request is optional
         }
 
@@ -888,7 +910,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $this->addStatusCommentOnUpdate($payment, $response);
                 $order->registerCancellation()->save();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //quiet decline
             $this->_logger->critical($e);
         }
