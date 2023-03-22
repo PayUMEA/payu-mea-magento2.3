@@ -1,6 +1,5 @@
 <?php
 
-
 namespace PayU\EasyPlus\Cron;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -189,18 +188,16 @@ class CheckTransactionState
      */
     public function getOrderCollection()
     {
-        // Not Needed for Cron
-        //$this->state->setAreaCode(\Magento\Framework\App\Area::AREA_FRONTEND); // or \Magento\Framework\App\Area::AREA_ADMINHTML, depending on your needs
-
         $collection = $this->_orderCollectionFactory->create()
             ->addFieldToSelect('*')
-            ->addFieldToFilter('status',
-                ['in' => ['pending_payment']]
-            )
-        ;
+            ->addFieldToFilter(
+                'status',
+                [
+                    'in' => explode(',', $this->getCRONConfigData('order_status'))
+                ]
+            );
 
         return $collection;
-
     }
 
 

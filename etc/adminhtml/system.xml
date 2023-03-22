@@ -15,6 +15,11 @@
                     <label>Disable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="order_status" translate="label" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Order Status</label>
+                    <comment>The status of orders to be processed</comment>
+                    <source_model>PayU\EasyPlus\Model\System\Config\Source\Order\Status\Pendingpayment</source_model>
+                </field>
                 <field id="payumea_cron_delay" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Delay (Minutes)</label>
                     <comment>
