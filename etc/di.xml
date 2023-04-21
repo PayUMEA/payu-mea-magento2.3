@@ -1,7 +1,24 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!--<type name="\Magento\Config\Model\Config\Structure\Element\Section">
-        <plugin name="easy_plus" type="PayU\EasyPlus\Model\Config\Structure\Element\Section"/>
-    </type>-->
+    <virtualType name="PayU\EasyPlus\Logger\VirtualHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+            <argument name="fileName" xsi:type="string">/var/log/payumea.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PayU\EasyPlus\Logger\VirtualLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">payumea-logger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">PayU\EasyPlus\Logger\VirtualHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="logger" xsi:type="object">PayU\EasyPlus\Logger\VirtualLogger</argument>
+        </arguments>
+    </type>
 </config>
