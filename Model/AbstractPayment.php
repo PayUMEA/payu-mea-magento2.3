@@ -309,7 +309,7 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function getDebugFlag()
     {
-        return (bool)(int)$this->getConfigData('developer/active');
+        return (bool)(int)$this->getConfigData('debug');
     }
 
     /**
