@@ -12,6 +12,8 @@ use Magento\Payment\Model\Method\AbstractMethod;
 
 abstract class AbstractPayU extends AbstractMethod
 {
+    const MAGENTO_ORDER_STATE_PENDING = 'pending';
+
     const REQUEST_TYPE_PAYMENT = 'PAYMENT';
 
     const REQUEST_TYPE_RESERVE = 'RESERVE';

@@ -346,7 +346,8 @@ abstract class AbstractPayment extends AbstractPayU
             case self::TRANS_STATE_EXPIRED:
             case self::TRANS_STATE_TIMEOUT:
                 throw new LocalizedException(
-                    $this->_dataFactory->create('frontend')->wrapGatewayError($this->getResponse()->getResultMessage())
+                    $this->_dataFactory->create('frontend')
+                        ->wrapGatewayError($this->getResponse()->getResultMessage())
                 );
             default:
                 throw new LocalizedException(
@@ -422,6 +423,7 @@ abstract class AbstractPayment extends AbstractPayU
         try {
             $response = $this->_easyPlusApi->doSetTransaction($request->getData());
 
+            $this->debugData(['info' => 'SetTransaction operation']);
             $this->debugData(['request' => $request->getData()]);
             $this->debugData(['response' => $response]);
 
@@ -460,9 +462,11 @@ abstract class AbstractPayment extends AbstractPayU
                 throw new LocalizedException(__('Contacting PayU gateway, error encountered'));
             }
         } catch (Exception $e) {
-            $this->debugData(['request' => $request->getData(), 'exception' => $e->getMessage()]);
-            $this->debugData(['response' => $response]);
-            $this->_logger->error(__('Contacting PayU gateway, error encountered. Reason: ' . $e->getMessage()));
+            $this->debugData([
+                'info' => 'Contacting PayU gateway, error encountered. Reason: ' . $e->getMessage(),
+                'request' => $request->getData(),
+                'response' => $response
+            ]);
 
             throw new LocalizedException(__('Oops! Transaction processing encountered an error.'));
         }
@@ -481,9 +485,6 @@ abstract class AbstractPayment extends AbstractPayU
     {
         $response = $this->_easyPlusApi->doGetTransaction($params, $this);
 
-        //$this->setResponseData($response);
-        //$response = $this->getResponse();
-
         $payUReference = $response->getTranxId();
 
         //operate with order
@@ -492,6 +493,7 @@ abstract class AbstractPayment extends AbstractPayU
         $message = 'Payment transaction of amount of %1 was canceled by user on PayU.<br/>' . 'PayU reference "%2"<br/>';
 
         $isError = false;
+
         if ($orderIncrementId) {
             /* @var $order Order */
             $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);

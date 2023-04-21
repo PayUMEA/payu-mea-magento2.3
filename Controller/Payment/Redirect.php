@@ -6,6 +6,7 @@
  */
 namespace PayU\EasyPlus\Controller\Payment;
 
+use Exception;
 use Magento\Framework\Controller\ResultFactory;
 use PayU\EasyPlus\Controller\AbstractAction;
 
@@ -32,8 +33,12 @@ class Redirect extends AbstractAction
                     __('Unable to redirect to PayU. Server error encountered.')
                 );
             }
-        } catch (\Exception $e) {
-            $this->messageManager->addExceptionMessage($e, __('Unable to redirect to PayU. Server error encountered'));
+        } catch (Exception $exception) {
+            $this->logger->debug(['error' => "Exception: " . $exception->getMessage()]);
+            $this->messageManager->addExceptionMessage(
+                $exception,
+                __('Unable to redirect to PayU. Server error encountered')
+            );
         }
 
         $this->_returnCustomerQuote(true, __('Unable to redirect to PayU. Server error encountered'));

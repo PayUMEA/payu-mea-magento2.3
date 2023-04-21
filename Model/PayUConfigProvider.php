@@ -55,7 +55,7 @@ class PayUConfigProvider implements ConfigProviderInterface
     /**
      * @var Repository
      */
-     protected $assetRepo;
+    protected $assetRepo;
 
     /**
      * @param PaymentHelper $paymentHelper
