@@ -17,6 +17,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
 use PayU\EasyPlus\Controller\AbstractAction;
+use PayU\EasyPlus\Model\AbstractPayU;
 
 class Response extends AbstractAction
 {
@@ -35,18 +36,20 @@ class Response extends AbstractAction
     {
         $bypass_payu_redirect = $this->getRedirectConfigData('bypass_payu_redirect');
 
-        $process_id = uniqid();
-        $process_string = self::class;
+        $processId = uniqid();
+        $processString = self::class;
 
-        $this->_getSession()->setPayUProcessId($process_id);
-        $this->_getSession()->setPayUProcessString($process_string);
+        $this->_getSession()->setPayUProcessId($processId);
+        $this->_getSession()->setPayUProcessString($processString);
 
-        $this->_logger->info("($process_id) START $process_string");
+        $this->logger->debug(['info' => "($processId) START $processString"]);
 
         /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         $result = '';
+        $orderId = '';
+
         try {
             $payu = $this->_initPayUReference();
 
@@ -57,43 +60,59 @@ class Response extends AbstractAction
             $order = $orderId ? $this->_orderFactory->create()->load($orderId) : false;
 
             if ('1' === $bypass_payu_redirect) {
-                $this->_logger->info("($process_id) ($orderId) PayU Redirect Disabled, checking possible existing IPN status");
+                $this->logger->debug([
+                    'info' => "($processId) ($orderId) PayU Redirect Disabled, checking possible existing IPN status"
+                ]);
 
-                $order_state = $order->getState();
+                $orderState = $order->getState();
 
                 // If the order is already a success
-                if (in_array($order_state, [
-                    Order::STATE_PROCESSING,
-                    Order::STATE_COMPLETE
-                ])) {
-                    $this->_logger->info("($process_id) ($orderId) PayU $process_string ALREADY SUCCESS (from IPN) -> Redirect User");
+                if (in_array(
+                    $orderState,
+                    [
+                        Order::STATE_PROCESSING,
+                        Order::STATE_COMPLETE
+                    ]
+                )) {
+                    $this->logger->debug([
+                        'info' => "($processId) ($orderId) PayU $processString ALREADY SUCCESS (via IPN): Redirect User"
+                    ]);
+
                     return $this->sendSuccessPage($order);
                 }
 
                 // Or still pending
-                if (in_array($order_state, [
-                    \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT,
-                ])) {
-                    $this->_logger->info("($process_id) ($orderId) PayU $process_string Order status pending");
+                if (in_array(
+                    $orderState,
+                    [
+                        Order::STATE_PENDING_PAYMENT,
+                        AbstractPayU::MAGENTO_ORDER_STATE_PENDING
+                    ]
+                )) {
+                    $this->logger->debug(['info' => "($processId) ($orderId) PayU $processString Order status pending"]);
+
                     return $this->sendPendingPage($order);
                 }
 
+                $result = 'Unable to validate order';
                 // Else there is a failure of some sort
                 $this->messageManager->addExceptionMessage(
-                    new LocalizedException(new Phrase('Unable to validate order')),
-                    __('Unable to validate order')
+                    new LocalizedException(new Phrase($result)),
+                    __($result)
                 );
-                $this->_returnCustomerQuote(true, $result);
+                $this->_returnCustomerQuote(true, __($result));
 
                 return $resultRedirect->setPath('checkout/cart');
             } else {
-                $this->_logger->info("($process_id) ($orderId) PayU Redirect Enabled, processing redirect response.");
+                $this->logger->debug([
+                    'info' => "($processId) ($orderId) PayU Redirect Enabled, processing redirect response."
+                ]);
             }
 
             if ($order->getState() == Order::STATE_PROCESSING) {
-                $this->_logger->info(
-                    "($process_id) ($orderId) PayU $process_string ALREADY SUCCESS (from IPN) -> Redirect User"
-                );
+                $this->logger->debug([
+                    'info' => "($processId) ($orderId) PayU $processString ALREADY SUCCESS (from IPN) -> Redirect User"
+                ]);
 
                 return $this->sendSuccessPage($order);
             }
@@ -109,10 +128,14 @@ class Response extends AbstractAction
                     return $this->sendSuccessPage($order);
                 }
             }
-        } catch (LocalizedException $e) {
-            $this->messageManager->addExceptionMessage($e, __('Unable to validate order'));
-        } catch (\Exception $e) {
-            $this->messageManager->addExceptionMessage($e, __('Unable to validate order'));
+        } catch (LocalizedException $localizedException) {
+            $this->logger->debug([
+                'error' => "LocalizedException: ($processId) ($orderId) " . $localizedException->getMessage()
+            ]);
+            $this->messageManager->addExceptionMessage($localizedException, __('Unable to validate order'));
+        } catch (Exception $exception) {
+            $this->logger->debug(['error' => "Exception: ($processId) ($orderId) " . $exception->getMessage()]);
+            $this->messageManager->addExceptionMessage($exception, __('Unable to validate order'));
         }
 
         $this->_returnCustomerQuote(true, $result);

@@ -5,24 +5,24 @@
  */
 namespace PayU\EasyPlus\Controller;
 
+use Exception;
 use Magento\Checkout\Controller\Express\RedirectLoginInterface;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Action as AppAction;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
-use PayU\EasyPlus\Model\CreditCard;
-use PayU\EasyPlus\Model\DiscoveryMiles;
-use PayU\EasyPlus\Model\Ebucks;
-use PayU\EasyPlus\Model\EFTPro;
-use PayU\EasyPlus\Model\Mobicred;
-use PayU\EasyPlus\Model\Ucount;
-use PayU\EasyPlus\Model\Rcs;
-use PayU\EasyPlus\Model\RcsPlc;
-use PayU\EasyPlus\Model\Fasta;
-use PayU\EasyPlus\Model\Mpesa;
-use PayU\EasyPlus\Model\AirtelMoney;
-use PayU\EasyPlus\Model\MobileBanking;
-use PayU\EasyPlus\Model\MtnMobile;
-use PayU\EasyPlus\Model\Tigopesa;
-use PayU\EasyPlus\Model\Equitel;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Phrase;
+use Magento\Framework\Session\Generic;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\OrderFactory;
+use PayU\EasyPlus\Model\Error\Code;
+use PayU\EasyPlus\Model\Response\Factory;
 
 /**
  * Abstract Checkout Controller
@@ -30,24 +30,6 @@ use PayU\EasyPlus\Model\Equitel;
  */
 abstract class AbstractAction extends AppAction implements RedirectLoginInterface
 {
-    protected $configTypes = [
-        CreditCard::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Ebucks::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        EFTPro::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        DiscoveryMiles::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Mobicred::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Ucount::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Rcs::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        RcsPlc::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Fasta::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Mpesa::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        AirtelMoney::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        MobileBanking::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        MtnMobile::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Tigopesa::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider',
-        Equitel::CODE => 'PayU\EasyPlus\Model\PayUConfigProvider'
-    ];
-
     /**
      * @var \Magento\Paypal\Model\Express\Checkout
      */
@@ -78,7 +60,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
     protected $_configMethod;
 
     /**
-     * @var \Magento\Customer\Model\Session
+     * @var Session
      */
     protected $_customerSession;
 
@@ -88,37 +70,32 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
     protected $_checkoutSession;
 
     /**
-     * @var \Magento\Sales\Model\OrderFactory
+     * @var OrderFactory
      */
     protected $_orderFactory;
 
     /**
-     * @var \Magento\Quote\Model\QuoteManagement
+     * @var QuoteManagement
      */
     protected $_quoteManagement;
 
     /**
-     * @var \Magento\Framework\Session\Generic
+     * @var Generic
      */
     protected $_payuSession;
 
     /**
-     * @var \Magento\Framework\Url\Helper\Data
+     * @var Data
      */
     protected $_urlHelper;
 
     /**
-     * @var \Magento\Customer\Model\Url
+     * @var Url
      */
     protected $_customerUrl;
 
     /**
-     * @var \PayU\EasyPlus\Model\Api\Api
-     */
-    protected $_api;
-
-    /**
-     * @var \PayU\EasyPlus\Model\Error\Code
+     * @var Code
      */
     protected $_errorCodes;
 
@@ -131,37 +108,40 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      */
     protected $_logger;
 
-
-    /** @var \Magento\Framework\App\Config\ScopeConfigInterface  */
+    /** @var ScopeConfigInterface */
     protected $_scopeConfig;
+
+    /** @var Logger */
+    protected $logger;
 
     /**
      * AbstractAction constructor.
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
+     * @param Context $context
+     * @param Session $customerSession
      * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Session\Generic $payuSession
-     * @param \Magento\Framework\Url\Helper\Data $urlHelper
-     * @param \Magento\Customer\Model\Url $customerUrl
-     * @param \Magento\Quote\Model\QuoteManagement $quoteManagement
-     * @param \PayU\EasyPlus\Model\Error\Code $errorCodes
-     * @param \PayU\EasyPlus\Model\Response\Factory $responseFactory
-     * @param \Magento\Payment\Model\Method\Logger $logger
+     * @param OrderFactory $orderFactory
+     * @param Generic $payuSession
+     * @param Data $urlHelper
+     * @param Url $customerUrl
+     * @param QuoteManagement $quoteManagement
+     * @param Code $errorCodes
+     * @param Factory $responseFactory
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Logger $logger
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
+        Context $context,
+        Session $customerSession,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Session\Generic $payuSession,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Magento\Customer\Model\Url $customerUrl,
-        \Magento\Quote\Model\QuoteManagement $quoteManagement,
-        \PayU\EasyPlus\Model\Error\Code $errorCodes,
-        \PayU\EasyPlus\Model\Response\Factory $responseFactory,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+        OrderFactory $orderFactory,
+        Generic $payuSession,
+        Data $urlHelper,
+        Url $customerUrl,
+        QuoteManagement $quoteManagement,
+        Code $errorCodes,
+        Factory $responseFactory,
+        ScopeConfigInterface $scopeConfig,
+        Logger $logger
     ) {
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
@@ -176,22 +156,23 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         parent::__construct($context);
 
         $this->response = $responseFactory->create();
-        $this->_logger = $logger;
-
+        $this->logger = $logger;
     }
 
     /**
      * Instantiate quote and checkout
      *
      * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _initCheckout()
     {
         $quote = $this->_getQuote();
+
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setStatusHeader(403, '1.1', 'Forbidden');
-            throw new \Magento\Framework\Exception\LocalizedException(__('We can\'t initialize Checkout.'));
+
+            throw new LocalizedException(__('We can\'t initialize Checkout.'));
         }
     }
 
@@ -201,7 +182,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      *
      * @param string|null $reference
      * @return $this|string
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _initPayUReference($reference = null)
     {
@@ -209,35 +190,39 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
             if (false === $reference) {
                 // security measure for avoid unsetting reference twice
                 if (!$this->_getSession()->getCheckoutReference()) {
-                    throw new \Magento\Framework\Exception\LocalizedException(
+                    throw new LocalizedException(
                         __('PayU Checkout Reference does not exist.')
                     );
                 }
+
                 $this->_getSession()->unsCheckoutReference();
             } else {
                 $this->_getSession()->setCheckoutReference($reference);
             }
+
             return $this;
         }
+
         $reference = $this->getRequest()->getParam('PayUReference') ?:
             $this->getRequest()->getParam('payUReference');
 
         if ($reference) {
             if ($reference !== $this->_getSession()->getCheckoutReference()) {
-                throw new \Magento\Framework\Exception\LocalizedException(
+                throw new LocalizedException(
                     __('A wrong PayU Checkout Reference was specified.')
                 );
             }
         } else {
             $reference = $this->_getSession()->getCheckoutReference();
         }
+
         return $reference;
     }
 
     /**
      * PayU session instance getter
      *
-     * @return \Magento\Framework\Session\Generic
+     * @return Generic
      */
     protected function _getSession()
     {
@@ -324,8 +309,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         $this->_getSession()->unsCheckoutOrderIncrementId();
     }
 
-
-    protected function sendPendingPage(\Magento\Sales\Model\Order $order)
+    protected function sendPendingPage(Order $order)
     {
         $this->_getCheckoutSession()
             ->setLastQuoteId($order->getQuoteId())
@@ -337,7 +321,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
             ->setLastOrderStatus($order->getStatus());
 
         $this->messageManager->addSuccessMessage(
-            __('Your order was placed ann will be processed once payment is validated.')
+            __('Your order was placed and will be processed once payment is confirmed.')
         );
 
         $this->clearSessionData();
@@ -345,7 +329,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         return $this->_redirect('checkout/onepage/success');
     }
 
-    protected function sendSuccessPage(\Magento\Sales\Model\Order $order)
+    protected function sendSuccessPage(Order $order)
     {
         $this->_getCheckoutSession()
             ->setLastQuoteId($order->getQuoteId())
@@ -369,14 +353,15 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      * Return customer quote
      *
      * @param bool $cancelOrder
-     * @param string $errorMsg
+     * @param Phrase|null $errorMsg
      * @return void
      */
-    protected function _returnCustomerQuote($cancelOrder = false, $errorMsg = '')
+    protected function _returnCustomerQuote(bool $cancelOrder = false, ?Phrase $errorMsg = null)
     {
         $incrementId = $this->_getCheckoutSession()->getLastRealOrderId();
+
         if ($incrementId) {
-            /* @var $order \Magento\Sales\Model\Order */
+            /* @var $order Order */
             $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($incrementId);
             if ($order->getId()) {
                 try {
@@ -397,11 +382,63 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
                     if ($cancelOrder) {
                         $order->registerCancellation($errorMsg)->save();
                     }
-                } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-                } catch (LocalizedException $localizedException){
-                } catch (\Exception $exception) {
+                } catch (NoSuchEntityException $exception) {
+                    $this->logger->debug(
+                        [
+                            'error' => ['message' => 'NoSuchEntityException: ' . $exception->getMessage()]
+                        ]
+                    );
+                } catch (LocalizedException $localizedException) {
+                    $this->logger->debug(
+                        [
+                            'error' => ['message' => 'LocalizedException: ' . $localizedException->getMessage()]
+                        ]
+                    );
+                } catch (Exception $exception) {
+                    $this->logger->debug(
+                        [
+                            'error' => ['message' => 'Exception: ' . $exception->getMessage()]
+                        ]
+                    );
                 }
             }
         }
+    }
+
+    /**
+     * @param string $httpCode
+     * @param null $text
+     */
+    protected function respond(string $httpCode = '200', $text = null)
+    {
+        if ($httpCode === '200') {
+            if (is_callable('fastcgi_finish_request')) {
+                if ($text !== null) {
+                    echo $text;
+                }
+
+                session_write_close();
+                fastcgi_finish_request();
+
+                return;
+            }
+        }
+
+        ignore_user_abort(true);
+        ob_start();
+
+        if ($text !== null) {
+            echo $text;
+        }
+
+        $serverProtocol = filter_input(INPUT_SERVER, 'SERVER_PROTOCOL', FILTER_SANITIZE_STRING);
+        header($serverProtocol . " {$httpCode} OK");
+        header('Content-Encoding: none');
+        header('Content-Length: ' . ob_get_length());
+        header('Connection: close');
+
+        ob_end_flush();
+        ob_flush();
+        flush();
     }
 }

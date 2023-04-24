@@ -15,6 +15,10 @@
         "OSL-3.0",
         "AFL-3.0"
     ],
+    "require": {
+        "ext-soap": "*",
+        "ext-simplexml": "*"
+    },
     "authors": [
         {
             "name": "Kenneth Onah",

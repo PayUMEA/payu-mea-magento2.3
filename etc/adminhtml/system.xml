@@ -100,6 +100,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -113,14 +118,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -184,6 +181,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -197,14 +199,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -268,6 +262,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -281,14 +280,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -352,6 +343,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -365,14 +361,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -436,6 +424,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -449,14 +442,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -520,6 +505,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -533,14 +523,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -604,6 +586,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -617,14 +604,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -688,6 +667,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -701,14 +685,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -772,6 +748,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -785,14 +766,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -856,6 +829,11 @@
                     <comment>Cannot be more than 200,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -869,14 +847,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -940,6 +910,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -953,14 +928,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1024,6 +991,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1037,14 +1009,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1108,6 +1072,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1121,14 +1090,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1192,6 +1153,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1205,14 +1171,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1276,6 +1234,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1289,14 +1252,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1360,6 +1315,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1373,14 +1333,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1444,6 +1396,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1457,14 +1414,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>
@@ -1528,6 +1477,11 @@
                     <comment>Cannot be more than 5,000,000.00</comment>
                     <frontend_class>validate-number</frontend_class>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Debug</label>
+                    <comment>Debug data is written to payumea.log</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <group id="payment_url" translate="label" type="text" sortOrder="800" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Payment Urls</label>
                     <field id="notification_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -1541,14 +1495,6 @@
                     <field id="cancel_url" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Cancel Url</label>
                         <comment>If in doubt, accept the default the value</comment>
-                    </field>
-                </group>
-                <group id="developer" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Debugging</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <comment>Debug data is written to debug.log</comment>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
             </group>

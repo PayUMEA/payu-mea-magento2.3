@@ -11,11 +11,13 @@
 
 namespace PayU\EasyPlus\Controller\Payment;
 
-use PayU\EasyPlus\Helper\XmlHelper;
-use PayU\EasyPlus\Controller\AbstractAction;
 use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Sales\Model\Order;
+use PayU\EasyPlus\Controller\AbstractAction;
+use PayU\EasyPlus\Helper\XmlHelper;
 
 class Notify extends AbstractAction implements CsrfAwareActionInterface
 {
@@ -24,39 +26,49 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
      */
     public function execute()
     {
+        $processId = uniqid();
+        $processString = self::class;
 
-        $process_id = uniqid();
-        $process_string = self::class;
+        $this->_getSession()->setPayUProcessId($processId);
+        $this->_getSession()->setPayUProcessString($processString);
 
-        $this->_getSession()->setPayUProcessId($process_id);
-        $this->_getSession()->setPayUProcessString($process_string);
-
-        $this->_logger->info("($process_id) START $process_string");
-
+        $this->logger->debug(['info' => "($processId) START $processString"]);
 
         $postData = file_get_contents("php://input");
         $sxe = simplexml_load_string($postData);
 
-        if(empty($sxe)) {
-            http_response_code('500');
+        $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON)->setJsonData('{}');
+
+        if (empty($sxe)) {
+            $this->respond('500', 'Instant Payment Notification data is empty');
+
+            return $resultJson;
         }
 
         $ipnData = XMLHelper::parseXMLToArray($sxe);
 
-        if($ipnData) {
-            $incrementId = $ipnData['MerchantReference'];
-            /** @var \Magento\Sales\Model\Order $order */
-            $order = $incrementId ? $this->_orderFactory->create()->loadByIncrementId($incrementId) : false;
-            if ($order) {
-                $this->response->processNotify($ipnData, $order);
-                http_response_code('200');
-            } else {
-                http_response_code('500');
-            }
-        } else {
-            http_response_code('500');
+        if (!$ipnData) {
+            $this->respond('500', 'Failed to decode Instant Payment Notification data.');
+
+            return $resultJson;
         }
+
+        $incrementId = $ipnData['MerchantReference'];
+        /** @var Order $order */
+        $order = $incrementId ? $this->_orderFactory->create()->loadByIncrementId($incrementId) : false;
+
+        if (!$order || ((int)$order->getId() <= 0)) {
+            $this->respond('500', 'Failed to load order.');
+
+            return $resultJson;
+        }
+
+        $this->respond();
+        $this->response->processNotify($ipnData, $order);
+
+        return $resultJson;
     }
+
     /**
      * @param RequestInterface $request
      *
