@@ -147,7 +147,7 @@ class Response extends DataObject
     public function processReturn($order)
     {
         $payment = $order->getPayment();
-        $payment->getMethodInstance()->process($this->getParams(), $this);
+        $payment->getMethodInstance()->process($this->getParams());
 
         /** @var \PayU\EasyPlus\Model\Response $response */
         $response = $payment->getMethodInstance()->getResponse();

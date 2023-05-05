@@ -653,17 +653,16 @@ abstract class AbstractPayment extends AbstractPayU
             $payment = $order->getPayment();
             if (!$payment || $payment->getMethod() != $this->getCode()) {
                 throw new LocalizedException(
-                    __('This payment didn\'t work out because we can\'t find this order.')
+                    __("This payment didn't work out because we can't find this order.")
                 );
             }
             if ($order->getId()) {
                 try {
                     // Everything looks good, so capture order
                     $this->captureOrderAndPayment($order);
-                } catch (LocalizedException $exception) {
-                    $test = 1;
-                } catch (Exception $exception) {
-                    $test = 1;
+                } catch (LocalizedException|Exception $exception) {
+                    $isError = true;
+                    $this->debug(['error' => $exception->getMessage()]);
                 }
             } else {
                 $isError = true;
@@ -676,7 +675,7 @@ abstract class AbstractPayment extends AbstractPayU
             $responseText = $this->_dataFactory->create('frontend')->wrapGatewayError($response->getResultMessage());
             $responseText = $responseText && !$response->isPaymentSuccessful()
                 ? $responseText
-                : __('This payment didn\'t work out because we can\'t find this order.');
+                : __("This payment didn't work out because we can't find this order.");
             throw new LocalizedException($responseText);
         }
     }
@@ -915,6 +914,7 @@ abstract class AbstractPayment extends AbstractPayU
         } catch (Exception $e) {
             //quiet decline
             $this->_logger->critical($e);
+            $this->debug(['error' => $e->getMessage()]);
         }
     }
 
