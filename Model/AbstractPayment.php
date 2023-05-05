@@ -513,7 +513,8 @@ abstract class AbstractPayment extends AbstractPayU
                 );
 
                 $order->addStatusHistoryComment($message);
-                $order->cancel()->save();
+                $order->cancel();
+                $this->_orderRepository->save($order);
             } else {
                 $isError = true;
             }
@@ -595,6 +596,7 @@ abstract class AbstractPayment extends AbstractPayU
                     case 'FAILED':
                     case 'TIMEOUT':
                     case 'EXPIRED':
+                        $order->addCommentToStatusHistory($transactionNotes);
                         $order->cancel();
                         $this->_orderRepository->save($order);
                         break;
@@ -612,8 +614,9 @@ abstract class AbstractPayment extends AbstractPayU
                 $transactionNotes .= "Result Code: " . $response->getResultCode();
                 $transactionNotes .= "Result Message: " . $response->getResultMessage();
 
-                $order->registerCancellation($transactionNotes);
-
+                $order->addCommentToStatusHistory($transactionNotes);
+                $order->cancel();
+                $this->_orderRepository->save($order);
                 $this->debugData(['info' => 'PayU payment Failed. Payment status unknown']);
             }
         } else {
