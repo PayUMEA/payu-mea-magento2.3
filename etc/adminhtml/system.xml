@@ -120,6 +120,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_payflex" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Payflex</label>
@@ -201,6 +205,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_ebucks" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA eBucks</label>
@@ -282,6 +290,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_eftpro" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA EFT Pro</label>
@@ -363,6 +375,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_discoverymiles" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Discovery Miles</label>
@@ -444,6 +460,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_mobicred" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Mobicred</label>
@@ -525,6 +545,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_ucount" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Ucount</label>
@@ -606,6 +630,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_rcs" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA RCS</label>
@@ -687,6 +715,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_rcs_plc" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA RCS PLC</label>
@@ -768,6 +800,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_fasta" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA FASTA Instant Credit</label>
@@ -849,6 +885,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_mpesa" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MPESA</label>
@@ -930,6 +970,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_airtel_money" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Airtel Money</label>
@@ -1011,6 +1055,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_mobile_banking" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Mobile Banking</label>
@@ -1092,6 +1140,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_mtn_mobile" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MTN Mobile</label>
@@ -1173,6 +1225,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_tigopesa" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Tigopesa</label>
@@ -1254,6 +1310,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_equitel" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Equitel</label>
@@ -1335,6 +1395,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_moretyme" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MoreTyme</label>
@@ -1416,6 +1480,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="payumea_capitec_pay" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU Capitec Pay</label>
@@ -1497,6 +1565,10 @@
                         <comment>If in doubt, accept the default the value</comment>
                     </field>
                 </group>
+                <field id="sort_order" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
         </section>
     </system>

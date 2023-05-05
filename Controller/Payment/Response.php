@@ -138,7 +138,7 @@ class Response extends AbstractAction
             $this->messageManager->addExceptionMessage($exception, __('Unable to validate order'));
         }
 
-        $this->_returnCustomerQuote(true, $result);
+        $this->_returnCustomerQuote(true, __($result));
 
         return $resultRedirect->setPath('checkout/cart');
     }
