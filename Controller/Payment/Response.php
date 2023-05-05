@@ -132,10 +132,10 @@ class Response extends AbstractAction
             $this->logger->debug([
                 'error' => "LocalizedException: ($processId) ($orderId) " . $localizedException->getMessage()
             ]);
-            $this->messageManager->addExceptionMessage($localizedException, __('Unable to validate order'));
+            $this->messageManager->addExceptionMessage($localizedException, __($localizedException->getMessage()));
         } catch (Exception $exception) {
             $this->logger->debug(['error' => "Exception: ($processId) ($orderId) " . $exception->getMessage()]);
-            $this->messageManager->addExceptionMessage($exception, __('Unable to validate order'));
+            $this->messageManager->addExceptionMessage($exception, __($exception->getMessage()));
         }
 
         $this->_returnCustomerQuote(true, $result);

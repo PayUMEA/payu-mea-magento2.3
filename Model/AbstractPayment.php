@@ -501,7 +501,7 @@ abstract class AbstractPayment extends AbstractPayU
             $payment = $order->getPayment();
             if (!$payment || $payment->getMethod() != $this->getCode()) {
                 throw new LocalizedException(
-                    __('This payment didn\'t work out because we can\'t find this order.')
+                    __("This payment didn't work out because we can't find this order.")
                 );
             }
             if ($order->getId()) {
@@ -522,10 +522,10 @@ abstract class AbstractPayment extends AbstractPayU
         }
 
         if ($isError) {
-            $responseText = $this->_dataFactory->create('frontend')->wrapGatewayError("safddgdgsf" /* $response->getResultMessage() */);
+            $responseText = $this->_dataFactory->create('frontend')
+                ->wrapGatewayError($response->getResultMessage());
             $responseText = $responseText
-                ? $responseText
-                : __('This payment didn\'t work out because we can\'t find this order.');
+                ?: __("This payment didn't work out because we can't find this order.");
 
             throw new LocalizedException($responseText);
         }
@@ -641,21 +641,21 @@ abstract class AbstractPayment extends AbstractPayU
         $response = $this->_easyPlusApi->doGetTransaction($params, $this);
         $this->setResponseData($response->getReturn());
 
+        $isError = false;
         $response = $this->getResponse();
-        //operate with order
         $orderIncrementId = $response->getInvoiceNum();
 
-        $isError = false;
         if ($orderIncrementId) {
-            /* @var $order Order */
             $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
-            //check payment method
             $payment = $order->getPayment();
+
+            // check payment method
             if (!$payment || $payment->getMethod() != $this->getCode()) {
                 throw new LocalizedException(
                     __('This payment didn\'t work out because we can\'t find this order.')
                 );
             }
+
             if ($order->getId()) {
                 try {
                     // Everything looks good, so capture order
@@ -701,7 +701,7 @@ abstract class AbstractPayment extends AbstractPayU
         } catch (Exception $e) {
             //decline the order (in case of wrong response code) but don't return money to customer.
             $message = $e->getMessage();
-            $this->declineOrder($order, $response, false, $message);
+            $this->declineOrder($order, $response, true, $message);
             throw $e;
         }
 
