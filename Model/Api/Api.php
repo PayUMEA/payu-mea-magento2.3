@@ -11,14 +11,15 @@
 
 namespace PayU\EasyPlus\Model\Api;
 
-use PayU\EasyPlus\Model\AbstractPayment;
-use Psr\Log\LoggerInterface;
-use PayU\EasyPlus\Model\Response\Factory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DataObject;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
+use PayU\EasyPlus\Model\AbstractPayment;
+use PayU\EasyPlus\Model\Response\Factory;
+use Psr\Log\LoggerInterface;
 
-class Api extends \Magento\Framework\DataObject
+class Api extends DataObject
 {
     private static $ns = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd';
 
@@ -343,11 +344,11 @@ class Api extends \Magento\Framework\DataObject
     /**
      * Transfer transaction/payment information from API instance to order payment
      *
-     * @param \Magento\Framework\DataObject $from
-     * @param \Magento\Payment\Model\InfoInterface $to
+     * @param DataObject $from
+     * @param InfoInterface $to
      * @return Api
      */
-    public function importPaymentInfo(\Magento\Framework\DataObject $from, \Magento\Payment\Model\InfoInterface $to)
+    public function importPaymentInfo(DataObject $from, InfoInterface $to)
     {
         /**
          * Detect payment review and/or frauds
