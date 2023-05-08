@@ -190,12 +190,12 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
             if (false === $reference) {
                 // security measure for avoid unsetting reference twice
                 if (!$this->_getSession()->getCheckoutReference()) {
+                    $this->_getSession()->unsCheckoutReference();
+
                     throw new LocalizedException(
                         __('PayU Checkout Reference does not exist.')
                     );
                 }
-
-                $this->_getSession()->unsCheckoutReference();
             } else {
                 $this->_getSession()->setCheckoutReference($reference);
             }
@@ -208,6 +208,9 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
 
         if ($reference) {
             if ($reference !== $this->_getSession()->getCheckoutReference()) {
+                $this->logger->debug([
+                    'info' => "PayU reference from request parameter: {$reference}, PayU reference in Magento session: " . $this->_getSession()->getCheckoutReference()
+                ]);
                 throw new LocalizedException(
                     __('A wrong PayU Checkout Reference was specified.')
                 );
