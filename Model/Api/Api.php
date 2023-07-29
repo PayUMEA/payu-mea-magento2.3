@@ -231,9 +231,10 @@ class Api extends DataObject
     {
         $methodCode = $this->getMethodCode();
         $environment = $this->scopeConfig->getValue(
-                        "payment/{$methodCode}/environment",
-                        ScopeInterface::SCOPE_STORE);
-        if(!$environment) {
+            "payment/{$methodCode}/environment",
+            ScopeInterface::SCOPE_STORE
+        );
+        if (!$environment) {
             $this->wsdlUrl = $this->sandboxUrl;
             $this->checkoutUrl = $this->sandboxCheckoutUrl;
         } else {
@@ -246,8 +247,8 @@ class Api extends DataObject
     {
         $header  = '<wsse:Security SOAP-ENV:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">';
         $header .= '<wsse:UsernameToken wsu:Id="UsernameToken-9" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">';
-        $header .= '<wsse:Username>'.$this->getUsername().'</wsse:Username>';
-        $header .= '<wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">'.$this->getPassword().'</wsse:Password>';
+        $header .= '<wsse:Username>' . $this->getUsername() . '</wsse:Username>';
+        $header .= '<wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">' . $this->getPassword() . '</wsse:Password>';
         $header .= '</wsse:UsernameToken>';
         $header .= '</wsse:Security>';
 
@@ -260,7 +261,7 @@ class Api extends DataObject
 
         $data['Api'] = $this->getApiVersion();
         $data['Safekey'] = $this->getSafeKey();
-        $data['AdditionalInformation']['payUReference'] = $reference;;
+        $data['AdditionalInformation']['payUReference'] = $reference;
 
         $result = $soapClient->getTransaction($data);
 
@@ -285,7 +286,7 @@ class Api extends DataObject
 
         $data['Api'] = $this->getApiVersion();
         $data['Safekey'] = $redirectPayment->getValue('safe_key');
-        $data['AdditionalInformation']['payUReference'] = $reference;;
+        $data['AdditionalInformation']['payUReference'] = $reference;
 
         $redirectPayment->debugData(['request' => $data]);
 
@@ -309,7 +310,7 @@ class Api extends DataObject
 
     private function getSoapSingleton()
     {
-        if(is_null(self::$_soapClient)) {
+        if (is_null(self::$_soapClient)) {
             $this->setGatewayEndpoint();
             $header = $this->getSoapHeader();
             $soapWsdlUrl = $this->getSoapEndpoint() . '?wsdl';
@@ -318,7 +319,7 @@ class Api extends DataObject
             $headerBody = new \SoapVar($header, XSD_ANYXML, null, null, null);
             $soapHeader = new \SOAPHeader(self::$ns, 'Security', $headerBody, true);
 
-            self::$_soapClient = new \SoapClient($soapWsdlUrl, array('trace' => 1, 'exception' => 0));
+            self::$_soapClient = new \SoapClient($soapWsdlUrl, ['trace' => 1, 'exception' => 0]);
             self::$_soapClient->__setSoapHeaders($soapHeader);
         }
 
@@ -361,9 +362,9 @@ class Api extends DataObject
         // give generic info about transaction state
         if ($from->isPaymentSuccessful()) {
             $to->setIsTransactionApproved(true);
-        } else if ($from->isPaymentPending()) {
+        } elseif ($from->isPaymentPending()) {
             $to->setIsTransactionPending(true);
-        } else if ($from->isPaymentProcessing()) {
+        } elseif ($from->isPaymentProcessing()) {
             $to->setIsTransactionProcessing(true);
         } else {
             $to->setIsTransactionDenied(true);
