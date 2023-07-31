@@ -593,6 +593,12 @@ abstract class AbstractPayment extends AbstractPayU
                         $order->addCommentToStatusHistory($transactionNotes);
                         $this->invoiceAndNotifyCustomer($order);
                         break;
+                    case 'PROCESSING':
+                        $order->addCommentToStatusHistory($transactionNotes);
+                        $order->setState(Order::STATE_PROCESSING);
+                        $order->setStatus(Order::STATE_PROCESSING);
+                        $this->_orderRepository->save($order);
+                        break;
                     case 'FAILED':
                     case 'TIMEOUT':
                     case 'EXPIRED':
@@ -718,7 +724,17 @@ abstract class AbstractPayment extends AbstractPayU
 
         // Here we must do something to check for a Pending request
         if ($payment->getIsTransactionPending()) {
-            $order->save();
+            $this->_orderRepository->save($order);
+
+            return;
+        }
+
+        // Here we must do something to check for a Pending request
+        if ($payment->getIsTransactionProcessing()) {
+            $order->setState(Order::STATE_PROCESSING);
+            $order->setStatus(Order::STATE_PROCESSING);
+            $this->_orderRepository->save($order);
+
             return;
         }
 
@@ -1028,6 +1044,14 @@ abstract class AbstractPayment extends AbstractPayU
         } elseif ($payment->getIsTransactionDenied()) {
             $message = __(
                 'Transaction %1 has been voided/declined. Transaction status is "%2". Amount %3.',
+                $transactionId,
+                $response->getTransactionState(),
+                $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered())
+            );
+            $payment->getOrder()->addStatusHistoryComment($message);
+        } elseif ($payment->getIsTransactionProcessing()) {
+            $message = __(
+                'Transaction %1 is still in processing. Transaction status is "%2". Amount %3.',
                 $transactionId,
                 $response->getTransactionState(),
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered())
