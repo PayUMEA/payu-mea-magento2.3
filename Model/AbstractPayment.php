@@ -553,7 +553,19 @@ abstract class AbstractPayment extends AbstractPayU
         //Checking the response from the SOAP call to see if IPN is valid
         if (isset($resultCode) && (!in_array($resultCode, ['POO5', 'EFTPRO_003', '999', '305']))) {
             if (isset($data['TransactionState'])
-                && (in_array($data['TransactionState'], ['PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED']))
+                && (
+                    in_array(
+                        $data['TransactionState'],
+                        [
+                            'PROCESSING',
+                            'SUCCESSFUL',
+                            'AWAITING_PAYMENT',
+                            'FAILED',
+                            'TIMEOUT',
+                            'EXPIRED'
+                        ]
+                    )
+                )
             ) {
                 $amountBasket = $data['Basket']['AmountInCents'] / 100;
                 $amountPaid = isset($data['PaymentMethodsUsed']['Creditcard']['AmountInCents'])
@@ -595,8 +607,6 @@ abstract class AbstractPayment extends AbstractPayU
                         break;
                     case 'PROCESSING':
                         $order->addCommentToStatusHistory($transactionNotes);
-                        $order->setState(Order::STATE_PROCESSING);
-                        $order->setStatus(Order::STATE_PROCESSING);
                         $this->_orderRepository->save($order);
                         break;
                     case 'FAILED':
@@ -731,8 +741,6 @@ abstract class AbstractPayment extends AbstractPayU
 
         // Here we must do something to check for a Pending request
         if ($payment->getIsTransactionProcessing()) {
-            $order->setState(Order::STATE_PROCESSING);
-            $order->setStatus(Order::STATE_PROCESSING);
             $this->_orderRepository->save($order);
 
             return;
