@@ -8,7 +8,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
     <default>
         <payment>
-
             <payumea_creditcard>
                 <model>PayU\EasyPlus\Model\CreditCard</model>
                 <active>0</active>
@@ -75,7 +74,7 @@
             <payumea_eftpro>
                 <model>PayU\EasyPlus\Model\EFTPro</model>
                 <active>0</active>
-                <title>EFT Pro</title>
+                <title>Pay by EFT</title>
                 <environment>0</environment>
                 <api_username>200021</api_username>
                 <api_password>WSAUFbw6</api_password>
