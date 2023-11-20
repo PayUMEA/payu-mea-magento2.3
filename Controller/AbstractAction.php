@@ -7,6 +7,7 @@ namespace PayU\EasyPlus\Controller;
 
 use Exception;
 use Magento\Checkout\Controller\Express\RedirectLoginInterface;
+use \Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Action as AppAction;
@@ -18,10 +19,16 @@ use Magento\Framework\Phrase;
 use Magento\Framework\Session\Generic;
 use Magento\Framework\Url\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Paypal\Model\Express\Checkout;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use PayU\EasyPlus\Model\Error\Code;
+use PayU\EasyPlus\Model\PayUConfigProvider;
 use PayU\EasyPlus\Model\Response\Factory;
 
 /**
@@ -31,17 +38,17 @@ use PayU\EasyPlus\Model\Response\Factory;
 abstract class AbstractAction extends AppAction implements RedirectLoginInterface
 {
     /**
-     * @var \Magento\Paypal\Model\Express\Checkout
+     * @var Checkout
      */
     protected $_checkout;
 
     /**
-     * @var \PayU\EasyPlus\Model\PayUConfigProvider
+     * @var PayUConfigProvider
      */
     protected $_config;
 
     /**
-     * @var \Magento\Quote\Model\Quote
+     * @var Quote
      */
     protected $_quote = false;
 
@@ -65,7 +72,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
     protected $_customerSession;
 
     /**
-     * @var \Magento\Checkout\Model\Session
+     * @var CheckoutSession
      */
     protected $_checkoutSession;
 
@@ -115,10 +122,25 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
     protected $logger;
 
     /**
+     * @var StoreManagerInterface
+     */
+    protected $_storeManager;
+
+    /**
+     * @var CartRepositoryInterface
+     */
+    protected $_quoteRepository;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $_orderRepository;
+
+    /**
      * AbstractAction constructor.
      * @param Context $context
      * @param Session $customerSession
-     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param CheckoutSession $checkoutSession
      * @param OrderFactory $orderFactory
      * @param Generic $payuSession
      * @param Data $urlHelper
@@ -128,11 +150,14 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      * @param Factory $responseFactory
      * @param ScopeConfigInterface $scopeConfig
      * @param Logger $logger
+     * @param StoreManagerInterface $storeManager
+     * @param CartRepositoryInterface $quoteRepository
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
         Context $context,
         Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
+        CheckoutSession $checkoutSession,
         OrderFactory $orderFactory,
         Generic $payuSession,
         Data $urlHelper,
@@ -141,7 +166,10 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         Code $errorCodes,
         Factory $responseFactory,
         ScopeConfigInterface $scopeConfig,
-        Logger $logger
+        Logger $logger,
+        StoreManagerInterface $storeManager,
+        CartRepositoryInterface $quoteRepository,
+        OrderRepositoryInterface $orderRepository
     ) {
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
@@ -152,6 +180,9 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         $this->_customerUrl = $customerUrl;
         $this->_errorCodes = $errorCodes;
         $this->_scopeConfig = $scopeConfig;
+        $this->_storeManager = $storeManager;
+        $this->_quoteRepository = $quoteRepository;
+        $this->_orderRepository = $orderRepository;
 
         parent::__construct($context);
 
@@ -207,16 +238,21 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
             $this->getRequest()->getParam('payUReference');
 
         if ($reference) {
-            if ($reference !== $this->_getSession()->getCheckoutReference()) {
+            $payUReference = $this->_getSession()->getCheckoutReference() ??
+                $this->_getSession()->getData('checkout_reference');
+
+            if ($reference !== $payUReference) {
                 $this->logger->debug([
-                    'info' => "PayU reference from request parameter: {$reference}, PayU reference in Magento session: " . $this->_getSession()->getCheckoutReference()
+                    'info' => "PayU reference from request parameter: {$reference}, PayU reference in Magento session: "
+                        . $payUReference
                 ]);
                 throw new LocalizedException(
                     __('A wrong PayU Checkout Reference was specified.')
                 );
             }
         } else {
-            $reference = $this->_getSession()->getCheckoutReference();
+            $reference = $this->_getSession()->getCheckoutReference() ??
+                $this->_getSession()->getData('checkout_reference');
         }
 
         return $reference;
@@ -245,7 +281,7 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
     /**
      * Return checkout quote object
      *
-     * @return \Magento\Quote\Model\Quote
+     * @return Quote
      */
     protected function _getQuote()
     {
@@ -361,23 +397,21 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      */
     protected function _returnCustomerQuote(bool $cancelOrder = false, ?Phrase $errorMsg = null)
     {
-        $incrementId = $this->_getCheckoutSession()->getLastRealOrderId();
+        $incrementId = $this->_getCheckoutSession()->getLastRealOrderId() ??
+            $this->_getCheckoutSession()->getData('last_real_order_id');
 
         if ($incrementId) {
-            /* @var $order Order */
-            $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($incrementId);
+            $order = $this->_orderFactory->create()->loadByIncrementId($incrementId);
+
             if ($order->getId()) {
                 try {
-                    /** @var \Magento\Quote\Api\CartRepositoryInterface $quoteRepository */
-                    $quoteRepository = $this->_objectManager->create('Magento\Quote\Api\CartRepositoryInterface');
-                    /** @var \Magento\Quote\Model\Quote $quote */
-                    $quote = $quoteRepository->get($order->getQuoteId());
-
+                    /** @var Quote $quote */
+                    $quote = $this->_quoteRepository->get($order->getQuoteId());
                     $quote->setIsActive(true)->setReservedOrderId(null);
-                    $quoteRepository->save($quote);
+                    $this->_quoteRepository->save($quote);
                     $this->_getCheckoutSession()->replaceQuote($quote);
 
-                    $this->_getSession()->unsCheckoutOrderIncrementId($incrementId);
+                    $this->_getSession()->unsCheckoutOrderIncrementId();
                     $this->_getSession()->unsetData('quote_id');
 
                     $this->clearSessionData();

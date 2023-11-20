@@ -43,7 +43,7 @@ class Response extends DataObject
         return $this->getData('return');
     }
 
-    public function isPaymentSuccessful()
+    public function isPaymentSuccessful(): bool
     {
         return $this->getReturn()->successful
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_SUCCESSFUL;
@@ -52,7 +52,7 @@ class Response extends DataObject
     /**
      * @return bool
      */
-    public function isPaymentPending()
+    public function isPaymentPending(): bool
     {
         return $this->getReturn()->successful
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_AWAITING_PAYMENT;
@@ -61,9 +61,9 @@ class Response extends DataObject
     /**
      * @return bool
      */
-    public function isPaymentProcessing()
+    public function isPaymentProcessing(): bool
     {
-        return $this->getReturn()->successful
+        return ($this->getReturn()->successful === true || $this->getReturn()->successful === false)
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_PROCESSING;
     }
 
@@ -87,24 +87,46 @@ class Response extends DataObject
         return $this->getReturn()->resultMessage;
     }
 
+    /**
+     * @return bool
+     */
+    public function hasPaymentMethod()
+    {
+        return isset($this->getReturn()->paymentMethodsUsed);
+    }
+
+    public function getPaymentMethod()
+    {
+        return $this->getReturn()->paymentMethodsUsed;
+    }
+
+    /**
+     * @return bool
+     */
     public function isPaymentMethodCc()
     {
-        return isset($this->getReturn()->paymentMethodUsed->Creditcard);
+        return $this->hasPaymentMethod() && isset($this->getReturn()->paymentMethodsUsed->cardNumber);
     }
 
-    public function getGatewayReference()
+    /**
+     * @return string
+     */
+    public function getGatewayReference(): string
     {
-        return isset($this->getReturn()->paymentMethodUsed->gatewayReference);
+        return $this->hasPaymentMethod() ? $this->getReturn()->paymentMethodsUsed->gatewayReference : '';
     }
 
+    /**
+     * @return string
+     */
     public function getCcNumber()
     {
-        return isset($this->getReturn()->paymentMethodUsed->cardNumber);
+        return $this->hasPaymentMethod() ? $this->getReturn()->paymentMethodsUsed->cardNumber : '';
     }
 
     public function getTotalCaptured()
     {
-        $paymentMethod = $this->getReturn()->paymentMethodsUsed;
+        $paymentMethod = $this->getPaymentMethod();
 
         if (!$paymentMethod) {
             $paymentMethod = $this->getReturn()->basket;
@@ -118,9 +140,12 @@ class Response extends DataObject
         return $this->getReturn()->displayMessage;
     }
 
+    /**
+     * @return bool
+     */
     public function isFraudDetected()
     {
-        return isset($this->getReturn()->fraud->resultCode);
+        return isset($this->getReturn()->fraud) && $this->getReturn()->fraud->resultCode;
     }
 
     public function getTransactionState()
@@ -138,33 +163,35 @@ class Response extends DataObject
         return $this->getReturn()->pointOfFailure;
     }
 
+    public function getFraudTransaction()
+    {
+        return isset($this->getReturn()->transaction) ? $this->getReturn()->transaction : null;
+    }
+
     /**
      * Process return from PayU after payment
      *
      * @param Order $order
-     * @return bool|string
+     * @return bool
+     * @throws LocalizedException
      */
-    public function processReturn($order)
+    public function processReturn(Order $order): bool
     {
         $payment = $order->getPayment();
         $payment->getMethodInstance()->process($this->getParams());
 
-        /** @var \PayU\EasyPlus\Model\Response $response */
+        /** @var Response $response */
         $response = $payment->getMethodInstance()->getResponse();
+        $this->setData($response->getData());
 
         if ($response->isPaymentSuccessful()) {
-            $this->api->importPaymentInfo($response, $payment);
-
             return true;
-        } elseif ($response->isPaymentPending()) {
-            $this->api->importPaymentInfo($response, $payment);
-
-            return true;
+        } elseif ($response->isPaymentPending() || $response->isPaymentProcessing()) {
+            return false;
         } else {
-            $message = $response->getDisplayMessage();
-            $payment->getMethodInstance()->declineOrder($order, $response, true, $message);
+            $payment->getMethodInstance()->declineOrder($order, $response, true);
 
-            return $message;
+            return false;
         }
     }
 

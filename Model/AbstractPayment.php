@@ -13,7 +13,9 @@ namespace PayU\EasyPlus\Model;
 
 use Exception;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Lock\LockManagerInterface;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Quote\Api\Data\CartInterface;
@@ -25,6 +27,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use PayU\EasyPlus\Helper\Data as FrontendHelper;
+use PayU\EasyPlus\Model\Api\Api;
 
 /**
  * Redirect payment method model for all payment methods except Discovery Miles
@@ -249,7 +252,7 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Get api
      *
-     * @return \PayU\EasyPlus\Model\Api\Api
+     * @return Api
      */
     public function getApi()
     {
@@ -259,7 +262,7 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Get api
      *
-     * @return \PayU\EasyPlus\Model\Response
+     * @return Response
      */
     public function getResponse()
     {
@@ -330,10 +333,10 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Check response code came from PayU.
      *
-     * @return true in case of Approved response
+     * @return void
      * @throws LocalizedException In  of Declined or Error response from Authorize.net
      */
-    public function checkResponseCode()
+    public function checkResponseCode(): void
     {
         $state = $this->getResponse()->getTransactionState();
 
@@ -341,7 +344,7 @@ abstract class AbstractPayment extends AbstractPayU
             case self::TRANS_STATE_SUCCESSFUL:
             case self::TRANS_STATE_PROCESSING:
             case self::TRANS_STATE_AWAITING_PAYMENT:
-                return true;
+                break;
             case self::TRANS_STATE_FAILED:
             case self::TRANS_STATE_EXPIRED:
             case self::TRANS_STATE_TIMEOUT:
@@ -567,27 +570,28 @@ abstract class AbstractPayment extends AbstractPayU
                     )
                 )
             ) {
-                $amountBasket = $data['Basket']['AmountInCents'] / 100;
-                $amountPaid = isset($data['PaymentMethodsUsed']['Creditcard']['AmountInCents'])
-                    ? $data['PaymentMethodsUsed']['Creditcard']['AmountInCents'] / 100 : '';
+                $amountPaid = 0.0;
+                $paymentMethod = [];
+                $amountDue = $data['Basket']['AmountInCents'] / 100;
 
-                if (empty($amountPaid)) {
-                    $amountPaid = isset($data['PaymentMethodsUsed']['Eft']['AmountInCents']) ?
-                        $data['PaymentMethodsUsed']['Eft']['AmountInCents'] / 100 : 'N/A';
+                if ($response->hasPaymentMethod()) {
+                    if (isset($data['PaymentMethodsUsed']['Creditcard'])) {
+                        $paymentMethod = $data['PaymentMethodsUsed']['Creditcard'];
+                        $amountPaid = $data['PaymentMethodsUsed']['Creditcard']['AmountInCents'] ?? 0 / 100;
+                    } elseif (isset($data['PaymentMethodsUsed']['Eft'])) {
+                        $paymentMethod = $data['PaymentMethodsUsed']['Eft'];
+                        $amountPaid = $data['PaymentMethodsUsed']['Eft']['AmountInCents'] ?? 0 / 100;
+                    } elseif (isset($data['PaymentMethodsUsed']['Mobicred'])) {
+                        $paymentMethod = $data['PaymentMethodsUsed']['Mobicred'];
+                        $amountPaid = $data['PaymentMethodsUsed']['Mobicred']['AmountInCents'] ?? 0 / 100;
+                    }
                 }
 
-                $transactionNotes .= "Order Amount: " . $amountBasket . "<br />";
+                $transactionNotes .= "Order Amount: " . $amountDue . "<br />";
                 $transactionNotes .= "Amount Paid: " . $amountPaid . "<br />";
                 $transactionNotes .= "Merchant Reference : " . $data['MerchantReference'] . "<br />";
                 $transactionNotes .= "PayU Reference: " . $payuReference . "<br />";
                 $transactionNotes .= "PayU Payment Status: " . $data["TransactionState"] . "<br /><br />";
-
-                $paymentMethod = isset($data['PaymentMethodsUsed']['Creditcard']) ?
-                    $data['PaymentMethodsUsed']['Creditcard'] : '';
-
-                if (empty($paymentMethod)) {
-                    $paymentMethod = isset($data['PaymentMethodsUsed']['Eft']) ? $data['PaymentMethodsUsed']['Eft'] : '';
-                }
 
                 if (!empty($paymentMethod)) {
                     if (is_array($paymentMethod)) {
@@ -598,30 +602,29 @@ abstract class AbstractPayment extends AbstractPayU
                     }
                 }
 
-                // update order state
+                $this->setResponseData($response->getReturn());
+
                 switch ($data['TransactionState']) {
                     // Payment completed
                     case 'SUCCESSFUL':
                         $order->addCommentToStatusHistory($transactionNotes);
-                        $this->invoiceAndNotifyCustomer($order);
+                        $this->captureOrderAndPayment($order);
                         break;
                     case 'PROCESSING':
                         $order->addCommentToStatusHistory($transactionNotes);
-                        $this->_orderRepository->save($order);
                         break;
                     case 'FAILED':
                     case 'TIMEOUT':
                     case 'EXPIRED':
                         $order->addCommentToStatusHistory($transactionNotes);
                         $order->cancel();
-                        $this->_orderRepository->save($order);
                         break;
                     default:
                         $order->addCommentToStatusHistory($transactionNotes, true);
-                        $this->_orderRepository->save($order);
                     break;
                 }
 
+                $this->_orderRepository->save($order);
                 $this->debugData(['info' => 'PayU IPN Processing complete.', 'response' => $data]);
             } else {
                 $transactionNotes = '<strong>Payment unsuccessful: </strong><br />';
@@ -643,7 +646,7 @@ abstract class AbstractPayment extends AbstractPayU
             $transactionNotes .= "Result Message: " . $response->getResultMessage();
 
             $order->registerCancellation($transactionNotes);
-
+            $this->_orderRepository->save($order);
             $this->debugData(['info' => 'PayU payment Failed']);
         }
     }
@@ -651,7 +654,7 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Operate with order using data from $_POST which came from PayU by Return URL.
      *
-     * @param string $params PayU reference Id
+     * @param string $params PayU reference
      * @return void
      * @throws LocalizedException In case of validation error or order capture error
      */
@@ -719,7 +722,7 @@ abstract class AbstractPayment extends AbstractPayU
         } catch (Exception $e) {
             //decline the order (in case of wrong response code) but don't return money to customer.
             $message = $e->getMessage();
-            $this->declineOrder($order, $response, true, $message);
+            $this->declineOrder($order, $response, true);
             throw $e;
         }
 
@@ -727,8 +730,6 @@ abstract class AbstractPayment extends AbstractPayU
         /* @var $payment InfoInterface| Payment */
         $payment = $order->getPayment();
         $this->fillPaymentInfoByResponse($payment);
-        $this->setIsInitializeNeeded(false);
-        $this->setResponseData($response->getReturn());
         $this->processPaymentFraudStatus($payment);
         $this->addStatusCommentOnUpdate($payment, $response);
 
@@ -753,7 +754,7 @@ abstract class AbstractPayment extends AbstractPayU
                 'Something went wrong: the paid amount does not match the order amount.'
                 . ' Please correct this and try again.'
             );
-            $this->declineOrder($order, $response, true, $message);
+            $this->declineOrder($order, $response, true);
             throw new LocalizedException($message);
         }
 
@@ -866,6 +867,10 @@ abstract class AbstractPayment extends AbstractPayU
             $payment->setIsTransactionPending(true);
         }
 
+        if ($response->getTransactionState() == self::TRANS_STATE_PROCESSING) {
+            $payment->setIsTransactionProcessing(true);
+        }
+
         if ($response->isFraudDetected()) {
             $payment->setIsFraudDetected(true);
         }
@@ -880,12 +885,12 @@ abstract class AbstractPayment extends AbstractPayU
     protected function processPaymentFraudStatus(Payment $payment)
     {
         try {
-            $fraudDetailsResponse = $payment->getMethodInstance()
-                ->fetchTransactionFraudDetails($payment, $this->getResponse()->getTranxId());
+            $fraudDetailsResponse = $this->fetchTransactionFraudDetails($payment, $this->getResponse()->getTranxId());
             $fraudData = $fraudDetailsResponse->getData();
 
             if (empty($fraudData)) {
                 $payment->setIsFraudDetected(false);
+
                 return $this;
             }
 
@@ -907,13 +912,9 @@ abstract class AbstractPayment extends AbstractPayU
      */
     public function generateRequestFromOrder(Order $order, $helper)
     {
-        $request = $this->_requestFactory->create()
+        return $this->_requestFactory->create()
             ->setConstantData($this, $order, $helper)
             ->setDataFromOrder($order, $this);
-
-        //$this->_debug(['request' => $request->getData()]);
-
-        return $request;
     }
 
     /**
@@ -922,10 +923,9 @@ abstract class AbstractPayment extends AbstractPayU
      * @param Order $order
      * @param Response $response
      * @param bool $voidPayment
-     * @param string $message
      * @return void
      */
-    public function declineOrder(Order $order, Response $response, bool $voidPayment = true, string $message = '')
+    public function declineOrder(Order $order, Response $response, bool $voidPayment = false)
     {
         $payment = $order->getPayment();
         try {
@@ -936,7 +936,7 @@ abstract class AbstractPayment extends AbstractPayU
             ) {
                 $this->_importToPayment($response, $payment);
                 $this->addStatusCommentOnUpdate($payment, $response);
-                $order->registerCancellation()->save();
+                $order->cancel()->save();
             }
         } catch (Exception $e) {
             //quiet decline
@@ -970,18 +970,19 @@ abstract class AbstractPayment extends AbstractPayU
     {
         $response = $this->fetchTransactionInfo($payment, $transactionId);
         $responseData = new DataObject();
+        $fraudTransaction = $response->getFraudTransaction();
 
-        if (empty($response->transaction->FDSFilters->FDSFilter)) {
-            return $response;
+        if (!isset($fraudTransaction)) {
+            return $responseData;
         }
 
         $responseData->setFdsFilterAction(
-            $response->transaction->FDSFilterAction
+            $fraudTransaction->FDSFilterAction
         );
-        $responseData->setAvsResponse((string)$response->transaction->AVSResponse);
-        $responseData->setCardCodeResponse((string)$response->transaction->cardCodeResponse);
-        $responseData->setCavvResponse((string)$response->transaction->CAVVResponse);
-        $responseData->setFraudFilters($this->getFraudFilters($response->transaction->FDSFilters));
+        $responseData->setAvsResponse((string)$fraudTransaction->AVSResponse);
+        $responseData->setCardCodeResponse((string)$fraudTransaction->cardCodeResponse);
+        $responseData->setCavvResponse((string)$fraudTransaction->CAVVResponse);
+        $responseData->setFraudFilters($this->getFraudFilters($fraudTransaction->FDSFilters));
 
         return $responseData;
     }
@@ -1033,7 +1034,7 @@ abstract class AbstractPayment extends AbstractPayU
 
         if ($payment->getIsTransactionApproved()) {
             $message = __(
-                'Transaction %1 has been approved. Amount %2. Transaction status is "%3"',
+                'Transaction %1 has been approved. Amount %2. PayU transaction status: "%3"',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
@@ -1043,7 +1044,7 @@ abstract class AbstractPayment extends AbstractPayU
             $test = 1;
         } elseif ($payment->getIsTransactionPending()) {
             $message = __(
-                'Transaction %1 is pending payment. Amount %2. Transaction status is "%3"',
+                'Transaction %1 is pending payment. Amount %2. PayU transaction status: "%3"',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
@@ -1051,18 +1052,18 @@ abstract class AbstractPayment extends AbstractPayU
             $payment->getOrder()->addStatusHistoryComment($message);
         } elseif ($payment->getIsTransactionDenied()) {
             $message = __(
-                'Transaction %1 has been voided/declined. Transaction status is "%2". Amount %3.',
+                'Transaction %1 has been voided/declined. Amount %2. PayU transaction status: "%3".',
                 $transactionId,
-                $response->getTransactionState(),
-                $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered())
+                $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
+                $response->getTransactionState()
             );
             $payment->getOrder()->addStatusHistoryComment($message);
         } elseif ($payment->getIsTransactionProcessing()) {
             $message = __(
-                'Transaction %1 is still in processing. Transaction status is "%2". Amount %3.',
+                'Transaction %1 is still in processing. Amount %2. PayU transaction status: "%3".',
                 $transactionId,
-                $response->getTransactionState(),
-                $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered())
+                $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
+                $response->getTransactionState()
             );
             $payment->getOrder()->addStatusHistoryComment($message);
         }
@@ -1163,13 +1164,13 @@ abstract class AbstractPayment extends AbstractPayU
      *
      * @param OrderPaymentInterface $payment
      * @return false | TransactionInterface
+     * @throws InputException
      */
     protected function getOrderTransaction($payment)
     {
         return $this->transactionRepository->getByTransactionType(
             Transaction::TYPE_ORDER,
-            $payment->getId(),
-            $payment->getOrder()->getId()
+            $payment->getId()
         );
     }
 }
