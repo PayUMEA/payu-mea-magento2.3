@@ -34,7 +34,7 @@ class Request extends DataObject
     ) {
         $additional_information = [
             'merchantReference'         => $order->getIncrementId(),
-            'notificationUrl'           => 'https://7691-105-244-159-43.ngrok-free.app/payu_easyplus/payment/notify',//$helper->getNotificationUrl($paymentMethod->getCode()),
+            'notificationUrl'           => $helper->getNotificationUrl($paymentMethod->getCode()),
             'cancelUrl'                 => $helper->getCancelUrl($paymentMethod->getCode()),
             'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
             'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),

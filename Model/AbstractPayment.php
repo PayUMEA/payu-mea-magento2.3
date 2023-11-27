@@ -597,7 +597,7 @@ abstract class AbstractPayment extends AbstractPayU
                     if (is_array($paymentMethod)) {
                         $transactionNotes .= "<strong>Payment Method Details:</strong>";
                         foreach ($paymentMethod as $key => $value) {
-                            $transactionNotes .= "<br />&nbsp;&nbsp;- " . $key . ":" . $value . " , ";
+                            $transactionNotes .= "<br />&nbsp;&nbsp;- " . $key . ":" . $value;
                         }
                     }
                 }
@@ -1039,7 +1039,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
-            $payment->getOrder()->addStatusHistoryComment($message);
+            $payment->getOrder()->addStatusHistoryComment($message . '<br/>Message: ' . $response->getResultMessage());
 
             $test = 1;
         } elseif ($payment->getIsTransactionPending()) {
@@ -1049,7 +1049,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
-            $payment->getOrder()->addStatusHistoryComment($message);
+            $payment->getOrder()->addStatusHistoryComment($message . '<br/>Message: ' . $response->getResultMessage());
         } elseif ($payment->getIsTransactionDenied()) {
             $message = __(
                 'Transaction %1 has been voided/declined. Amount %2. PayU transaction status: "%3".',
@@ -1057,7 +1057,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
-            $payment->getOrder()->addStatusHistoryComment($message);
+            $payment->getOrder()->addStatusHistoryComment($message . '<br/>Message: ' . $response->getResultMessage());
         } elseif ($payment->getIsTransactionProcessing()) {
             $message = __(
                 'Transaction %1 is still in processing. Amount %2. PayU transaction status: "%3".',
@@ -1065,7 +1065,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
-            $payment->getOrder()->addStatusHistoryComment($message);
+            $payment->getOrder()->addStatusHistoryComment($message . '<br/>Message: ' . $response->getResultMessage());
         }
     }
 

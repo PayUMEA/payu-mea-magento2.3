@@ -7,7 +7,7 @@ namespace PayU\EasyPlus\Controller;
 
 use Exception;
 use Magento\Checkout\Controller\Express\RedirectLoginInterface;
-use \Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Action as AppAction;
