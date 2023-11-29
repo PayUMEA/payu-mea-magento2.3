@@ -22,11 +22,9 @@ class Redirect extends AbstractAction
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         try {
-            $url = $this->_getSession()->getCheckoutRedirectUrl();
+            $url = $this->_getSession()->getData('checkout_redirect_url', true);
 
             if ($url) {
-                $this->_getSession()->unsCheckoutRedirectUrl();
-
                 return $resultRedirect->setPath($url);
             } else {
                 $this->messageManager->addErrorMessage(

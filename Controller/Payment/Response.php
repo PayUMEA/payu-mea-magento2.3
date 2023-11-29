@@ -34,7 +34,7 @@ class Response extends AbstractAction
      */
     public function execute()
     {
-        $bypass_payu_redirect = $this->getRedirectConfigData('bypass_payu_redirect');
+        $bypassPayuRedirect = $this->getRedirectConfigData('bypass_payu_redirect');
 
         $processId = uniqid();
         $processString = self::class;
@@ -54,12 +54,13 @@ class Response extends AbstractAction
             $payu = $this->_initPayUReference();
 
             // if there is an order - load it
-            $orderId = $this->_getCheckoutSession()->getLastOrderId();
+            $orderId = $this->_getCheckoutSession()->getLastOrderId() ??
+                $this->_getCheckoutSession()->getData('last_order_id');
 
             /** @var Order $order */
-            $order = $orderId ? $this->_orderFactory->create()->load($orderId) : false;
+            $order = $orderId ? $this->_orderRepository->get($orderId) : false;
 
-            if ('1' === $bypass_payu_redirect) {
+            if ('1' === $bypassPayuRedirect) {
                 $this->logger->debug([
                     'info' => "($processId) ($orderId) PayU Redirect Disabled, checking possible existing IPN status"
                 ]);
@@ -117,13 +118,22 @@ class Response extends AbstractAction
                 return $this->sendSuccessPage($order);
             }
 
-            if ($payu && $order) {
+            $message = 'Error encountered processing payment';
+
+            if ($payu) {
                 $this->response->setData('params', $payu);
 
-                $result = $this->response->processReturn($order);
+                $successful = $this->response->processReturn($order);
+                $message = $this->response->getDisplayMessage();
 
-                if ($result !== true) {
-                    $this->messageManager->addErrorMessage(__($result));
+                if (!$successful) {
+                    if ($this->response->isPaymentPending() || $this->response->isPaymentProcessing()) {
+                        $this->messageManager->addSuccessMessage($this->response->getDisplayMessage());
+
+                        return $this->sendPendingPage($order);
+                    }
+
+                    $this->messageManager->addErrorMessage(__($message));
                 } else {
                     return $this->sendSuccessPage($order);
                 }
@@ -133,12 +143,14 @@ class Response extends AbstractAction
                 'error' => "LocalizedException: ($processId) ($orderId) " . $localizedException->getMessage()
             ]);
             $this->messageManager->addExceptionMessage($localizedException, __($localizedException->getMessage()));
+            $this->clearSessionData();
         } catch (Exception $exception) {
             $this->logger->debug(['error' => "Exception: ($processId) ($orderId) " . $exception->getMessage()]);
             $this->messageManager->addExceptionMessage($exception, __($exception->getMessage()));
+            $this->clearSessionData();
         }
 
-        $this->_returnCustomerQuote(true, __($result));
+        $this->_returnCustomerQuote(true, __($message));
 
         return $resultRedirect->setPath('checkout/cart');
     }

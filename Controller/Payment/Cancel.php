@@ -14,6 +14,7 @@ namespace PayU\EasyPlus\Controller\Payment;
 use Exception;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order;
 use PayU\EasyPlus\Controller\AbstractAction;
 
 class Cancel extends AbstractAction
@@ -38,14 +39,17 @@ class Cancel extends AbstractAction
             $payu = $this->_initPayUReference();
 
             // if there is an order - cancel it
-            $orderId = $this->_getCheckoutSession()->getLastOrderId();
+            $orderId = $this->_getCheckoutSession()->getLastOrderId() ??
+                $this->_getCheckoutSession()->getData('last_order_id');
+            $quoteId = $this->_getCheckoutSession()->getLastSuccessQuoteId() ??
+                $this->_getCheckoutSession()->getData('last_success_quote_id');
 
-            /** @var \Magento\Sales\Model\Order $order */
-            $order = $orderId ? $this->_orderFactory->create()->load($orderId) : false;
+            /** @var Order $order */
+            $order = $orderId ? $this->_orderRepository->get($orderId) : false;
 
             if ($payu &&
                 $order &&
-                $order->getQuoteId() == $this->_getCheckoutSession()->getLastSuccessQuoteId()
+                $order->getQuoteId() == $quoteId
             ) {
                 $this->response->setData('params', $payu);
 

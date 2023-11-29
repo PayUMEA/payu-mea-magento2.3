@@ -8,6 +8,11 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
     <default>
         <payment>
+            <payumea_cron>
+                <bypass_payu_cron>1</bypass_payu_cron>
+                <order_status>pending,pending_payment</order_status>
+                <payumea_cron_delay>5</payumea_cron_delay>
+            </payumea_cron>
             <payumea_creditcard>
                 <model>PayU\EasyPlus\Model\CreditCard</model>
                 <active>0</active>

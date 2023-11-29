@@ -15,6 +15,8 @@ use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use PayU\EasyPlus\Controller\AbstractAction;
 use PayU\EasyPlus\Helper\XmlHelper;
@@ -23,6 +25,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
 {
     /**
      * Process Instant Payment Notification (IPN) from PayU
+     * @throws NoSuchEntityException|LocalizedException
      */
     public function execute()
     {
@@ -55,7 +58,10 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
 
         $incrementId = $ipnData['MerchantReference'];
         /** @var Order $order */
-        $order = $incrementId ? $this->_orderFactory->create()->loadByIncrementId($incrementId) : false;
+        $order = $incrementId ? $this->_orderFactory->create()->loadByIncrementIdAndStoreId(
+            $incrementId,
+            $this->_storeManager->getStore()->getId()
+        ) : false;
 
         if (!$order || ((int)$order->getId() <= 0)) {
             $this->respond('500', 'Failed to load order.');
