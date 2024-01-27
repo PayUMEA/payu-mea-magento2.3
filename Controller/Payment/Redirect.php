@@ -25,6 +25,8 @@ class Redirect extends AbstractAction
             $url = $this->_getSession()->getData('checkout_redirect_url', true);
 
             if ($url) {
+                $this->_getSession()->unsCheckoutRedirectUrl();
+
                 return $resultRedirect->setPath($url);
             } else {
                 $this->messageManager->addErrorMessage(
