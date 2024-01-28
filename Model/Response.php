@@ -160,12 +160,16 @@ class Response extends DataObject
 
     public function getTransactionState()
     {
-        return $this->getReturn()->transactionState;
+        return isset($this->getReturn()->transactionState) ?
+            $this->getReturn()->transactionState :
+            '';
     }
 
     public function getTransactionType()
     {
-        return $this->getReturn()->transactionType;
+        return isset($this->getReturn()->transactionType) ?
+            $this->getReturn()->transactionType :
+            '';
     }
 
     public function getPointOfFailure()
@@ -180,7 +184,7 @@ class Response extends DataObject
 
     public function getTotalDue()
     {
-        return $this->getReturn()->basket->amountInCents;
+        return isset($this->getReturn()->basket) ? $this->getReturn()->basket->amountInCents : 0;
     }
 
     /**
