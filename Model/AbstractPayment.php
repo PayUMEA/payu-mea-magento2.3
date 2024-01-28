@@ -801,8 +801,14 @@ abstract class AbstractPayment extends AbstractPayU
             $order->setCanSendNewEmailFlag(true);
             $this->orderSender->send($order);
 
-            $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . print_r($order->canInvoice(), 1)]);
-            $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . print_r($order->canInvoice(), 1));
+            $this->debugData(
+                [
+                    'info' => " ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice()
+                ]
+            );
+            $this->_logger->info(
+                " ($process_id) ($id) PayU $process_string: can_invoice (initial check): " . $order->canInvoice()
+            );
 
             if ($order->canInvoice()) {
                 /**
@@ -811,8 +817,12 @@ abstract class AbstractPayment extends AbstractPayU
                  * discard invoice if status changed since start of process
                  */
                 $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
-                $this->debugData(['info' => " ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order_status_test->canInvoice()]);
-                $this->_logger->info(" ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order->canInvoice());
+                $this->debugData([
+                    'info' => " ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order_status_test->canInvoice()
+                ]);
+                $this->_logger->info(
+                    " ($process_id) ($id) PayU $process_string: can_invoice (double check): " . $order->canInvoice()
+                );
 
                 if (!$order_status_test->canInvoice()) {
                     // Simply just skip this section
