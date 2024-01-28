@@ -2,193 +2,243 @@
 
 namespace PayU\EasyPlus\Cron;
 
+use Exception;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\State;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Registry;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use PayU\EasyPlus\Model\AbstractPayment;
-use \Psr\Log\LoggerInterface;
+use Magento\Sales\Model\Order\Config;
+use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\Collection;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
+use Magento\Sales\Model\Service\InvoiceService;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use PayU\EasyPlus\Model\AbstractPayU;
+use PayU\EasyPlus\Model\Api\Api;
+use PayU\EasyPlus\Model\Api\Factory;
+use PayU\EasyPlus\Model\Response;
+use Psr\Log\LoggerInterface;
 
 class CheckTransactionState
 {
+    /**
+     * @var string
+     */
+    protected $processId;
 
-    /** @var LoggerInterface  */
-    protected $logger;
+    /**
+     * @var LoggerInterface
+     */
+    protected $_logger;
 
-    /** @var \PayU\EasyPlus\Model\Api\Api  */
+    /**
+     * @var Api
+     */
     protected $_easyPlusApi;
 
-    /** @var \Magento\Framework\Encryption\EncryptorInterface  */
+    /**
+     * @var EncryptorInterface
+     */
     protected $_encryptor;
 
-    /** @var \Magento\Store\Model\StoreManagerInterface  */
+    /**
+     * @var StoreManagerInterface
+     */
     protected $_storeManager;
 
-    /** @var \Magento\Framework\App\Config\ScopeConfigInterface  */
+    /**
+     * @var ScopeConfigInterface
+     */
     protected $_scopeConfig;
 
-    protected $orderFactory;
-
+    /**
+     * @var OrderFactory
+     */
+    protected $_orderFactory;
 
     /**
-     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     * @var SearchCriteriaBuilder
      */
-    protected $orderRepository;
+    protected $_searchCriteriaBuilder;
+
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @var Registry|null
      */
-    protected $searchCriteriaBuilder;
+    protected $_coreRegistry = null;
 
-    /** @var \Magento\Framework\Registry|null  */
-    protected $coreRegistry = null;
-
-    /** @var null  */
+    /**
+     * @var null
+     */
     protected $_code = null;
 
-    /** @var null  */
+    /**
+     * @var null
+     */
     protected $_payUReference = null;
 
-    /** @var \Magento\Framework\App\State **/
-    private $state;
+    /**
+     * @var State *
+     */
+    private $_state;
 
-    /** @var \Magento\Sales\Model\ResourceModel\Order\CollectionFactory  */
+    /**
+     * @var CollectionFactory
+     */
     protected $_orderCollectionFactory;
+
     /**
-     * @var Order\Email\Sender\OrderSender
+     * @var OrderSender
      */
-    private $orderSender;
+    private $_orderSender;
+
     /**
-     * @var Order\Email\Sender\InvoiceSender
+     * @var InvoiceSender
      */
-    private $invoiceSender;
+    private $_invoiceSender;
+
     /**
-     * @var \Magento\Sales\Model\Service\InvoiceService
+     * @var InvoiceService
      */
     private $_invoiceService;
-    /**
-     * @var \Magento\Framework\DB\Transaction
-     */
-    private $_transaction;
-    /**
-     * @var Order\Config
-     */
-    private $OrderConfig;
 
     /**
-     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     * @var Transaction
      */
-    private $OrderRepository;
+    private $_transaction;
+
+    /**
+     * @var Config
+     */
+    private $_orderConfig;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $_orderRepository;
 
     /**
      * CheckTransactionState constructor.
+     * @param State $state
      * @param LoggerInterface $logger
-     * @param \PayU\EasyPlus\Model\Api\Factory $apiFactory
-     * @param \Magento\Framework\Encryption\EncryptorInterface $encryptor
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
-     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param \Magento\Framework\App\State $state
-     * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
-     * @param Order\Email\Sender\OrderSender $orderSender
-     * @param Order\Email\Sender\InvoiceSender $invoiceSender
-     * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
-     * @param \Magento\Framework\DB\Transaction $transaction
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $OrderRepository
-     * @param Order\Config $OrderConfig
+     * @param Factory $apiFactory
+     * @param EncryptorInterface $encryptor
+     * @param StoreManagerInterface $storeManager
+     * @param Registry $registry
+     * @param ScopeConfigInterface $scopeConfig
+     * @param OrderRepositoryInterface $orderRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param CollectionFactory $orderCollectionFactory
+     * @param OrderSender $orderSender
+     * @param InvoiceSender $invoiceSender
+     * @param InvoiceService $invoiceService
+     * @param Transaction $transaction
+     * @param Config $orderConfig
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
+        State $state,
         LoggerInterface $logger,
-        \PayU\EasyPlus\Model\Api\Factory $apiFactory,
-        \Magento\Framework\Encryption\EncryptorInterface $encryptor,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Framework\App\State $state,
-        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
-        \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
-        \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
-        \Magento\Sales\Model\Service\InvoiceService $invoiceService,
-        \Magento\Framework\DB\Transaction $transaction,
-        \Magento\Sales\Api\OrderRepositoryInterface $OrderRepository,
-        \Magento\Sales\Model\Order\Config $OrderConfig,
-        \Magento\Sales\Model\OrderFactory $orderFactory
-    )
-    {
-        $this->logger = $logger;
+        Factory $apiFactory,
+        EncryptorInterface $encryptor,
+        StoreManagerInterface $storeManager,
+        Registry $registry,
+        ScopeConfigInterface $scopeConfig,
+        OrderRepositoryInterface $orderRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        CollectionFactory $orderCollectionFactory,
+        OrderSender $orderSender,
+        InvoiceSender $invoiceSender,
+        InvoiceService $invoiceService,
+        Transaction $transaction,
+        Config $orderConfig,
+        OrderFactory $orderFactory
+    ) {
+        $this->_state = $state;
+        $this->_logger = $logger;
         $this->_easyPlusApi = $apiFactory->create();
         $this->_encryptor = $encryptor;
         $this->_storeManager = $storeManager;
-        $this->coreRegistry = $registry;
+        $this->_coreRegistry = $registry;
         $this->_scopeConfig = $scopeConfig;
-        $this->orderRepository = $orderRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->state = $state;
+        $this->_orderRepository = $orderRepository;
+        $this->_searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->_orderCollectionFactory = $orderCollectionFactory;
-        $this->orderSender = $orderSender;
-        $this->invoiceSender = $invoiceSender;
+        $this->_orderSender = $orderSender;
+        $this->_invoiceSender = $invoiceSender;
         $this->_invoiceService = $invoiceService;
         $this->_transaction = $transaction;
-        $this->OrderRepository = $OrderRepository;
-        $this->OrderConfig = $OrderConfig;
-        $this->orderFactory = $orderFactory;
-
+        $this->_orderConfig = $orderConfig;
+        $this->_orderFactory = $orderFactory;
     }
 
     /**
-     * @param $data
-     * @param $order
+     * @param Response $response
+     * @param OrderInterface $order
+     * @throws LocalizedException
      */
-    public function processReturn($data, &$order) {
-        $data = (array)$data;
-        $data['basket'] = array($data['basket']);
-        //$data['paymentMethodsUsed'] = array($data['paymentMethodsUsed']);
-
+    public function processReturn(Response $response, OrderInterface $order)
+    {
         $transactionNotes = "<strong>-----PAYU STATUS CHECKED ---</strong><br />";
 
-        if(!isset($data['resultCode']) || (in_array($data['resultCode'], array('POO5', 'EFTPRO_003', '999', '305')))) {
-            $this->logger->info("($this->process_id) No resultCode");
-            $this->logger->info(json_encode($data));
+        if (!$response->getResultCode() || (in_array($response->getResultCode(), ['POO5', 'EFTPRO_003', '999', '305']))) {
+            $this->_logger->info("($this->processId) No resultCode");
+            $this->_logger->info($response->toJson());
+
             return;
         }
 
-        if(!isset($data["transactionState"])
-            || (!in_array($data['transactionState'],  array('PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED')))
+        if (!$response->getTransactionState()
+            || (!in_array(
+                $response->getTransactionState(),
+                ['PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED']
+            ))
         ) {
-            $this->logger->info("($this->process_id) No transactionState");
-            $this->logger->info(json_encode($data));
+            $this->_logger->info("($this->processId) No transactionState");
+            $this->_logger->info($response->toJson());
+
             return;
         }
 
-        $transactionNotes .= "PayU Reference: " . $data["payUReference"] . "<br />";
-        $transactionNotes .= "PayU Payment Status: ". $data["transactionState"]."<br /><br />";
+        $totalDue = $response->getTotalDue() ?? $order->getTotalDue();
 
-        switch ($data['transactionState']) {
-            // Payment completed
+        $transactionNotes .= "PayU Result Code: " . $response->getResultCode() . "<br />";
+        $transactionNotes .= "PayU Reference: " . $response->getTranxId() . "<br />";
+        $transactionNotes .= "PayU Message: " . $response->getResultMessage() . "<br />";
+        $transactionNotes .= "PayU Payment Status: " . $response->getTransactionState() . "<br /><br />";
+        $transactionNotes .= "Order Amount: " . $totalDue . "<br />";
+        $transactionNotes .= "Amount Paid: " . $response->getTotalCaptured() . "<br />";
+        $transactionNotes .= "Merchant Reference : " . $response->getInvoiceNum() . "<br />";
+
+        switch ($response->getTransactionState()) {
             case 'SUCCESSFUL':
-                $order->addStatusHistoryComment($transactionNotes);
                 $this->invoiceAndNotifyCustomer($order);
                 break;
             case 'FAILED':
             case 'TIMEOUT':
             case 'EXPIRED':
-                $order->registerCancellation($transactionNotes);
-                $order->save();
-                break;
-            default:
-                $order->addStatusHistoryComment($transactionNotes, true);
+                $order->cancel();
                 break;
         }
 
+        $order->addStatusHistoryComment($transactionNotes, true);
+        $this->_orderRepository->save($order);
     }
 
     /**
-     * @return \Magento\Sales\Model\ResourceModel\Order\Collection
+     * @return Collection
      */
     public function getOrderCollection()
     {
-        $collection = $this->_orderCollectionFactory->create()
+        return $this->_orderCollectionFactory->create()
             ->addFieldToSelect('*')
             ->addFieldToFilter(
                 'status',
@@ -196,259 +246,244 @@ class CheckTransactionState
                     'in' => explode(',', $this->getCRONConfigData('order_status'))
                 ]
             );
-
-        return $collection;
     }
 
-
-
-
-
-
-
     /**
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function execute()
     {
+        $bypassPayuCron = $this->getCRONConfigData('bypass_payu_cron');
 
+        if ('1' ===  $bypassPayuCron) {
+            $this->_logger->info("PayU CRON DISABLED");
 
-        $bypass_payu_cron = $this->getCRONConfigData('bypass_payu_cron');
-
-        if('1' ===  $bypass_payu_cron) {
-            $this->logger->info("PayU CRON DISABLED");
             return;
         }
 
-        $process_id = uniqid();
-        $this->process_id = $process_id;
+        $processId = uniqid();
+        $this->processId = $processId;
 
-        $this->logger->info("PayU CRON Started, PID: $process_id");
+        $this->_logger->info("PayU CRON Started, PID: $processId");
 
         $orders = $this->getOrderCollection();
+
         foreach ($orders->getItems() as $order) {
             $payment = $order->getPayment();
-            $additional_info = $payment->getAdditionalInformation();
+            $additionalInfo = $payment->getAdditionalInformation();
             $code = $payment->getData('method');
 
             $id = $order->getEntityId();
-            $this->logger->info("($process_id) Check: $id");
+            $this->_logger->info("($processId) Check: $id");
 
-            if(false === strpos($code, 'payumea')) {
-                $this->logger->info("($process_id) Not PayU");
+            if (false === strpos($code, 'payumea')) {
+                $this->_logger->info("($processId) Not PayU");
+
                 continue;
             }
 
-            if(isset($additional_info["fraud_details"])) {
-                if(in_array($additional_info["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
-                    $this->logger->info("($process_id) ($id) Already Success");
+            if (isset($additionalInfo["fraud_details"])) {
+                if (in_array($additionalInfo["fraud_details"]["return"]["transactionState"], ['SUCCESSFUL'])) {
+                    $this->_logger->info("($processId) ($id) Already Success");
+
                     continue;
                 }
-                $payUReference = $additional_info["fraud_details"]["return"]["payUReference"];
+
+                $payUReference = $additionalInfo["fraud_details"]["return"]["payUReference"];
             } else {
-                if(!isset($additional_info["payUReference"])) {
-                    $this->logger->info("($process_id) No Details");
+                if (!isset($additionalInfo["payUReference"])) {
+                    $this->_logger->info("($processId) No Details");
+
                     continue;
                 }
-                $payUReference = $additional_info["payUReference"];
+                $payUReference = $additionalInfo["payUReference"];
             }
 
-            if(isset($additional_info["fraud_details"]["return"]["transactionState"])) {
-                $state_test = $additional_info["fraud_details"]["return"]["transactionState"];
-            } else {
-                $state_test = '';
-            }
+            $stateTest = $additionalInfo["fraud_details"]["return"]["transactionState"] ?? '';
 
-            switch ($state_test) {
-                case AbstractPayment::TRANS_STATE_SUCCESSFUL:
-                case AbstractPayment::TRANS_STATE_FAILED:
-                case AbstractPayment::TRANS_STATE_EXPIRED:
-                case AbstractPayment::TRANS_STATE_TIMEOUT:
-                    $this->logger->info(" ($id) Already Success Status");
+            switch ($stateTest) {
+                case AbstractPayU::TRANS_STATE_SUCCESSFUL:
+                case AbstractPayU::TRANS_STATE_FAILED:
+                case AbstractPayU::TRANS_STATE_EXPIRED:
+                case AbstractPayU::TRANS_STATE_TIMEOUT:
+                    $this->_logger->info(" ($id) Already Success Status");
                     break;
                 default:
 
-                    if(!$this->shouldDoCheck($order, $payment)) {
-                        $this->logger->info("($process_id) ($id) Check not timed");
+                    if (!$this->shouldDoCheck($order, $payment)) {
+                        $this->_logger->info("($processId) ($id) Check not timed");
                         break;
                     }
 
-                    $this->logger->info("($process_id) ($id) Doing Check");
-                    // We will check trans state again
+                    $this->_logger->info("($processId) ($id) Doing Check");
                     $this->_code = $code;
                     $this->_payUReference = $payUReference;
-                    // We must get some config settings
-                    $this->initializeApi();
+                    $this->initializeApi($order->getStoreId());
 
                     $result = $this->_easyPlusApi->checkTransaction($this->_payUReference);
+                    $order = $this->_orderRepository->get($order->getId());
 
-                    $return = $result->getData('return');
+                    if ($order->getState() == Order::STATE_PROCESSING) {
+                        $this->_logger->info("Order Completed, no need to run... order id = " . $order->getId());
 
-                    $order = $this->orderRepository->get($order->getId());
-
-                    if($order->getState() == \Magento\Sales\Model\Order::STATE_PROCESSING) {
-                        $this->logger->info("Order Completed, no need to run... order id = " . $order->getId());
                         break;
                     }
 
-                    if($order->hasInvoices()) {
-                        $this->logger->info("($process_id) Already Invoiced, no need to run... order id = " . $order->getId());
+                    if ($order->hasInvoices()) {
+                        if (
+                            $order->getState() == Order::STATE_PENDING_PAYMENT &&
+                            $result->isPaymentSuccessful()
+                        ) {
+                            $order->setState('processing')
+                                ->setStatus('processing');
+                            $this->_orderRepository->save($order);
+                        }
+
+                        $this->_logger->info("($processId) Already Invoiced, no need to run... order id = " . $order->getId());
+
                         break;
                     }
 
-                    try{
-                        $this->processReturn($return, $order);
-                    } catch (\Exception $exception) {
-                        $this->logger->info($exception->getMessage());
-                        $this->logger->info(json_encode($return));
+                    try {
+                        $this->processReturn($result, $order);
+                    } catch (Exception $exception) {
+                        $this->_logger->info($exception->getMessage());
+                        $this->_logger->info($result->toJson());
                     }
 
                     $order->setUpdatedAt(null);
                     $order->save();
                     break;
             }
-        };
+        }
 
-        // Do your Stuff
-        $this->logger->info("PayU CRON Ended, PID: $process_id");
+        $this->_logger->info("PayU CRON Ended, PID: $processId");
     }
 
     protected function shouldDoCheck(&$order, $payment)
     {
-        $created_at = strtotime($order->getCreatedAt());
-        $updated_at = strtotime($order->getUpdatedAt());
+        $createdAt = strtotime($order->getCreatedAt());
+        $updatedAt = strtotime($order->getUpdatedAt());
 
+        $timeNow = time();
 
-        $time_now = time();
+        $minutesCreated = (int) ceil(($timeNow - $createdAt) / 60);
+        $minutesUpdated = $minutesCreated - (int) ceil(($timeNow - $updatedAt) / 60);
 
-        $minutes_created = (int) ceil (($time_now - $created_at) / 60 );
-        $minutes_updated = $minutes_created - (int) ceil (($time_now - $updated_at) / 60 );
+        $payumeaCronDelay = $this->getCRONConfigData('payumea_cron_delay');
 
-
-        $payumea_cron_delay = $this->getCRONConfigData('payumea_cron_delay');
-
-        if(empty($payumea_cron_delay)) {
-            $payumea_cron_delay = "5";
+        if (empty($payumeaCronDelay)) {
+            $payumeaCronDelay = "5";
         }
 
-        $this->logger->info("($this->process_id) minutes_created: $minutes_created - Delay: $payumea_cron_delay");
-        $this->logger->info("($this->process_id) minutes_updated: $minutes_updated - Delay: $payumea_cron_delay");
+        $this->_logger->info("($this->processId) minutes_created: $minutesCreated - Delay: $payumeaCronDelay");
+        $this->_logger->info("($this->processId) minutes_updated: $minutesUpdated - Delay: $payumeaCronDelay");
 
-
-        $minutes_created = $minutes_created - $payumea_cron_delay;
-        $minutes_updated = $minutes_updated - $payumea_cron_delay;
-
-
-
-
-        // After X minute
-    //    if($minutes_created == 1) { return true; }
-    //    if($minutes_created == 2) { return true; }
-     //   if($minutes_created == 3) { return true; }
-
+        $minutesCreated = $minutesCreated - $payumeaCronDelay;
+        $minutesUpdated = $minutesUpdated - $payumeaCronDelay;
 
         $ranges = [];
-        $ranges[] = [1,4];
-        $ranges[] = [5,9];
-        $ranges[] = [10,19];
-        $ranges[] = [20,29];
-        $ranges[] = [30,59];
-        $ranges[] = [(1*60),(2*60)-1];
-        $ranges[] = [(2*60),(3*60)-1];
-        $ranges[] = [(3*60),(6*60)-1];
-        $ranges[] = [(6*60),(12*60)-1];
-        $ranges[] = [(12*60),(24*60)-1];
+        $ranges[] = [1, 4];
+        $ranges[] = [5, 9];
+        $ranges[] = [10, 19];
+        $ranges[] = [20, 29];
+        $ranges[] = [30, 59];
+        $ranges[] = [(60),(2 * 60) - 1];
+        $ranges[] = [(2 * 60), (3 * 60) - 1];
+        $ranges[] = [(3 * 60), (6 * 60) - 1];
+        $ranges[] = [(6 * 60), (12 * 60) - 1];
+        $ranges[] = [(12 * 60), (24 * 60) - 1];
 
-
-
-        for ($i=1;$i<=31;$i++) {
+        for ($i = 1; $i <= 31; $i++) {
             $ii = $i * 24;
-            $ranges[] = [($ii*60),($ii*60)-1];
+            $ranges[] = [($ii * 60), ($ii * 60) - 1];
         }
 
-     //   ob_start();
-     //   var_dump($ranges);
-     //   $this->logger->info("PayU CRON Time Ranges" . ob_get_clean());
-
-
         foreach ($ranges as $v) {
-            if( (($v[0] <= $minutes_created) && ($minutes_created <= $v[1]))  && (!(($v[0]  <= $minutes_updated) && ($minutes_updated <= $v[1]))) ) {
+            if (
+                (
+                    ($v[0] <= $minutesCreated) &&
+                    ($minutesCreated <= $v[1])
+                )  &&
+                (
+                    !(($v[0]  <= $minutesUpdated) &&
+                        ($minutesUpdated <= $v[1]))
+                )
+            ) {
                 return true;
             }
         }
 
-        if( ((744 <= $minutes_created) )  && (!((744<= $minutes_updated))) ) {
+        if (((744 <= $minutesCreated))  && (!((744 <= $minutesUpdated)))) {
             return true;
         }
 
-        $this->logger->info("($this->process_id) Check Not Needed");
+        $this->_logger->info("($this->processId) Check Not Needed");
 
         return false;
-
     }
 
-    protected function initializeApi()
+    protected function initializeApi($storeId = null)
     {
-        $this->_easyPlusApi->setSafeKey($this->getValue('safe_key'));
-        $this->_easyPlusApi->setUsername($this->getValue('api_username'));
-        $this->_easyPlusApi->setPassword($this->getValue('api_password'));
+        $this->_easyPlusApi->setSafeKey($this->getValue('safe_key', $storeId));
+        $this->_easyPlusApi->setUsername($this->getValue('api_username', $storeId));
+        $this->_easyPlusApi->setPassword($this->getValue('api_password', $storeId));
         $this->_easyPlusApi->setMethodCode($this->_code);
     }
 
-
     public function getValue($key, $storeId = null)
     {
-        if(in_array($key, ['safe_key', 'api_password']))
+        if (in_array($key, ['safe_key', 'api_password'])) {
             return $this->_encryptor->decrypt($this->getConfigData($key, $storeId));
+        }
 
         return $this->getConfigData($key, $storeId);
     }
 
-
     public function getConfigData($field, $storeId = null)
     {
         $path = 'payment/' . $this->_code . '/' . $field;
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+
+        return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getCRONConfigData($field, $storeId = null)
     {
         $path = 'payment/payumea_cron/' . $field;
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+
+        return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     protected function invoiceAndNotifyCustomer(Order $order)
     {
-
         $id = $order->getIncrementId();
 
         try {
             $order->setCanSendNewEmailFlag(true);
-            $this->orderSender->send($order);
+            $this->_orderSender->send($order);
 
-            $this->logger->info("($this->process_id) ($id) PayU CRON: can_invoice (initial check): " . $order->canInvoice());
-         //   $this->debugData(['info' => $order->canInvoice()]);
-            if($order->canInvoice()) {
+            $this->_logger->info("($this->processId) ($id) PayU CRON: can_invoice (initial check): " . $order->canInvoice());
+
+            if ($order->canInvoice()) {
 
                 /**
                  * 2021/06/16 Double Invoice Correction
                  * Force reload order state to check status just before update,
                  * discard invoice if status changed since start of process
                  */
-                $order_status_test = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
-                $this->logger->info('($this->process_id) ($id) PayU CRON: can_invoice (double check): ' .  $order_status_test->canInvoice());
+                $orderStatus = $this->_orderFactory->create()->loadByIncrementId($order->getIncrementId());
+                $this->_logger->info('($this->process_id) ($id) PayU CRON: can_invoice (double check): ' . $orderStatus->canInvoice());
 
-                if(!$order_status_test->canInvoice()) {
+                if (!$orderStatus->canInvoice()) {
                     // Simply just skip this section
                     goto cannot_invoice_marker;
                 }
 
-                $status = $this->OrderConfig->getStateDefaultStatus('processing');
+                $status = $this->_orderConfig->getStateDefaultStatus('processing');
                 $order->setState("processing")->setStatus($status);
-                $order->save();
+                $this->_orderRepository->save($order);
 
                 $invoice = $this->_invoiceService->prepareInvoice($order);
-
                 $invoice->register();
                 $invoice->save();
                 $transactionService = $this->_transaction->addObject(
@@ -458,33 +493,24 @@ class CheckTransactionState
                 );
                 $transactionService->save();
 
-                $this->logger->info(" ($this->process_id) ($id) PayU CRON: INVOICED");
-
-
-                $this->invoiceSender->send($invoice);
+                $this->_logger->info(" ($this->processId) ($id) PayU CRON: INVOICED");
+                $this->_invoiceSender->send($invoice);
 
                 //send notification code
                 $order->addStatusHistoryComment(
                     __('Notified customer about invoice #%1.', $invoice->getId())
-                )
-                    ->setIsCustomerNotified(true)
-                    ->save();
-
+                )->setIsCustomerNotified(true);
+                $this->_orderRepository->save($order);
             } else {
                 /**
                  * Double Invoice Correction
                  * 2021/06/16
                  */
                 cannot_invoice_marker:
-                $this->logger->info('($this->process_id)  ($id) Already invoiced, skip');
-            //    $this->debugData(['info' => 'Already invoiced, skip']);
+                $this->_logger->info('($this->process_id)  ($id) Already invoiced, skip');
             }
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new LocalizedException("Error encountered while capturing your order");
         }
     }
-
-
-
 }
