@@ -12,11 +12,42 @@
 namespace PayU\EasyPlus\Model;
 
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Module\Dir;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\Order;
 use PayU\EasyPlus\Helper\Data;
 
 class Request extends DataObject
 {
+    /**
+     * @var Dir
+     */
+    private $moduleDir;
+
+    /**
+     * @var File
+     */
+    private $driverFile;
+
+    /**
+     * @var Json
+     */
+    protected $jsonSerializer;
+
+    public function __construct(
+        Dir $moduleDir,
+        File $driverFile,
+        Json $jsonSerializer,
+        array $data = []
+    ) {
+        $this->moduleDir = $moduleDir;
+        $this->driverFile = $driverFile;
+        $this->jsonSerializer = $jsonSerializer;
+
+        parent::__construct($data);
+    }
 
     /**
      * Set PayU data to request.
@@ -316,8 +347,7 @@ class Request extends DataObject
             'description' => sprintf('#%s, %s', $order->getIncrementId(), $order->getCustomerEmail()),
             'amountInCents' => ($order->getBaseTotalDue() * 100),
             'currencyCode' => $paymentMethod->getValue('currency')]
-        )
-        ->setData(
+        )->setData(
             'Customer',
             [
             'merchantUserId' => $order->getCustomerId(),
@@ -327,8 +357,27 @@ class Request extends DataObject
             'mobile' => $order->getBillingAddress()->getTelephone(),
             'regionalId' => $this->getPhoneCode($order->getBillingAddress()->getCountryId()),
             'countryCode' => $this->getPhoneCode($order->getBillingAddress()->getCountryId())]
+        )->setData(
+            'Customfield',
+            [
+                'key' => "plugin_version",
+                'value' => $this->getPluginVersion()
+            ]
         );
 
         return $this;
+    }
+
+    protected function getPluginVersion()
+    {
+        try {
+            $modulePath = $this->moduleDir->getDir('PayU_EasyPlus');
+            $composerJson = $this->driverFile->fileGetContents($modulePath . DIRECTORY_SEPARATOR . 'composer.json');
+            $serializedData = $this->jsonSerializer->unserialize($composerJson);
+        } catch (FileSystemException $e) {
+            $serializedData = [];
+        }
+
+        return $serializedData['version'] ?? 'no-version';
     }
 }

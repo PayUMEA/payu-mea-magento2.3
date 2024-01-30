@@ -126,13 +126,23 @@ class Response extends DataObject
 
     public function getTotalCaptured()
     {
-        $paymentMethod = $this->getPaymentMethod();
+        $total = 0;
+        $paymentMethods = $this->getPaymentMethod();
 
-        if (!$paymentMethod) {
-            $paymentMethod = $this->getReturn()->basket;
+        if (!$paymentMethods) {
+            return $total;
         }
 
-        return ($paymentMethod->amountInCents / 100);
+        if (is_a($paymentMethods, \stdClass::class, true)) {
+            return ($paymentMethods->amountInCents / 100);
+        }
+
+        foreach ($paymentMethods as $paymentMethod) {
+            $total += $paymentMethod->amountInCents;
+        }
+
+        // Prevent division by zero
+        return (max($total, 1) / 100);
     }
 
     public function getDisplayMessage()
@@ -150,12 +160,16 @@ class Response extends DataObject
 
     public function getTransactionState()
     {
-        return $this->getReturn()->transactionState;
+        return isset($this->getReturn()->transactionState) ?
+            $this->getReturn()->transactionState :
+            '';
     }
 
     public function getTransactionType()
     {
-        return $this->getReturn()->transactionType;
+        return isset($this->getReturn()->transactionType) ?
+            $this->getReturn()->transactionType :
+            '';
     }
 
     public function getPointOfFailure()
@@ -166,6 +180,11 @@ class Response extends DataObject
     public function getFraudTransaction()
     {
         return isset($this->getReturn()->transaction) ? $this->getReturn()->transaction : null;
+    }
+
+    public function getTotalDue()
+    {
+        return isset($this->getReturn()->basket) ? $this->getReturn()->basket->amountInCents : 0;
     }
 
     /**
