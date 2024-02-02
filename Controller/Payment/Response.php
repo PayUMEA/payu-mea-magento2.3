@@ -49,6 +49,7 @@ class Response extends AbstractAction
 
         $result = '';
         $orderId = '';
+        $message = 'Error encountered processing payment';
 
         try {
             $payu = $this->_initPayUReference();
@@ -117,8 +118,6 @@ class Response extends AbstractAction
 
                 return $this->sendSuccessPage($order);
             }
-
-            $message = 'Error encountered processing payment';
 
             if ($payu) {
                 $this->response->setData('params', $payu);
