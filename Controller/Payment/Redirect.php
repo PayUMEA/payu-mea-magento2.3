@@ -30,7 +30,7 @@ class Redirect extends AbstractAction
                 return $resultRedirect->setPath($url);
             } else {
                 $this->messageManager->addErrorMessage(
-                    __('Unable to redirect to PayU. Server error encountered.')
+                    __('Invalid redirect url. Unable to redirect to PayU.')
                 );
             }
         } catch (Exception $exception) {

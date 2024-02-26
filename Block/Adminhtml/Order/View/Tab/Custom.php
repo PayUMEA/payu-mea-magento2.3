@@ -1,10 +1,15 @@
 <?php
 
-
 namespace PayU\EasyPlus\Block\Adminhtml\Order\View\Tab;
 
+use Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\Data\Form\FormKey;
+use Magento\Framework\Registry;
+use Magento\Sales\Model\Order;
 
-class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend\Block\Widget\Tab\TabInterface
+class Custom extends Template implements TabInterface
 {
     /**
      * Template
@@ -13,40 +18,41 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     protected $_template = 'PayU_EasyPlus::order/view/tab/custom.phtml';
 
-
     /**
      * Core registry
      *
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $coreRegistry = null;
 
     /**
-     * @var \Magento\Framework\Data\Form\FormKey
+     * @var FormKey
      */
     protected $formKey;
 
-
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
+     * @param Context $context
+     * @param Registry $registry
+     * @param FormKey $formKey
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\Data\Form\FormKey $formKey,
+        Context $context,
+        Registry $registry,
+        FormKey $formKey,
         array $data = []
     ) {
         $this->coreRegistry = $registry;
+
         parent::__construct($context, $data);
+
         $this->formKey = $formKey;
     }
 
     /**
      * Retrieve order model instance
      *
-     * @return \Magento\Sales\Model\Order
+     * @return Order
      */
     public function getOrder()
     {
@@ -58,7 +64,7 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function getTabLabel()
     {
-        return __('PayU EasyPlus');
+        return __('PayU Transaction');
     }
 
     /**
@@ -66,7 +72,7 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function getTabTitle()
     {
-        return __('PayU EasyPlus');
+        return __('PayU Transaction');
     }
 
     /**
@@ -74,9 +80,6 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function canShowTab()
     {
-        // For me, I wanted this tab to always show
-        // You can play around with the ACL settings
-        // to selectively show later if you want
         return true;
     }
 
@@ -85,9 +88,6 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function isHidden()
     {
-        // For me, I wanted this tab to always show
-        // You can play around with conditions to
-        // show the tab later
         return false;
     }
 
@@ -98,8 +98,6 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function getTabClass()
     {
-        // I wanted mine to load via AJAX when it's selected
-        // That's what this does
         return 'ajax only';
     }
 
@@ -120,11 +118,8 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
      */
     public function getTabUrl()
     {
-        // customtab is a adminhtml router we're about to define
-        // the full route can really be whatever you want
-        return $this->getUrl('payueasyplus/*/customTab', ['_current' => true]);
+        return $this->getUrl('payu_easyplus/*/customTab', ['_current' => true]);
     }
-
 
     public function getFormKey()
     {
@@ -133,8 +128,6 @@ class Custom extends \Magento\Backend\Block\Template implements \Magento\Backend
 
     public function getAjaxUrl()
     {
-        return $this->getUrl('payueasyplus/index/index');
+        return $this->getUrl('payu_easyplus/index/index');
     }
-
-
 }

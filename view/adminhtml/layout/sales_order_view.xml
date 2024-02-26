@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2024 PayU Financial Services. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="PayU_EasyPlus::js/sales_order_tabs.js"/>
     </head>
     <body>
-        <!--
         <referenceContainer name="left">
             <referenceBlock name="sales_order_tabs">
                 <action method="addTab">
@@ -13,6 +18,5 @@
                 </action>
             </referenceBlock>
         </referenceContainer>
-        -->
     </body>
 </page>

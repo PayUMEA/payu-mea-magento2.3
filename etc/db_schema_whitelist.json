@@ -1,0 +1,19 @@
+{
+    "payu_transaction": {
+        "column": {
+            "id": true,
+            "increment_id": true,
+            "process_id": true,
+            "locked": true,
+            "entity_id": true,
+            "created_at": true,
+            "process_class": true,
+            "lock": true,
+            "status": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "PAYU_TRANSACTION_INCREMENT_ID": true
+        }
+    }
+}

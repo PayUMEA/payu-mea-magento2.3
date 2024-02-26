@@ -8,10 +8,15 @@
  * @copyright   PayU South Africa (http://payu.co.za)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 namespace PayU\EasyPlus\Block;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Block\Info;
+use PayU\EasyPlus\Helper\DataFactory;
 
 /**
  * Class Iframe
@@ -19,34 +24,34 @@ use Magento\Payment\Block\Info;
 class Main extends Info
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     private $registry;
 
     /**
-     * @var \PayU\EasyPlus\Helper\DataFactory
+     * @var DataFactory
      */
     protected $dataFactory;
 
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var ManagerInterface
      */
     private $messageManager;
 
     /**
      * Constructor
      *
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \PayU\EasyPlus\Helper\DataFactory $dataFactory
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param Context $context
+     * @param Registry $registry
+     * @param DataFactory $dataFactory
+     * @param ManagerInterface $messageManager
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \PayU\EasyPlus\Helper\DataFactory $dataFactory,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
+        Context $context,
+        Registry $registry,
+        DataFactory $dataFactory,
+        ManagerInterface $messageManager,
         array $data = []
     ) {
         $this->registry = $registry;

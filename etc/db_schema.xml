@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2024 PayU Financial Services. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="payu_transaction" resource="default" engine="innodb" comment="PayU payment transaction log">
+        <column xsi:type="int" name="entity_id" unsigned="false" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="increment_id" nullable="false" comment="Order Increment ID"/>
+        <column xsi:type="varchar" name="process_id" nullable="false" comment="Process ID"/>
+        <column xsi:type="varchar" name="process_class" nullable="false" comment="Process Class"/>
+        <column xsi:type="boolean" name="lock" nullable="false" default="false" comment="Transaction lock"/>
+        <column xsi:type="varchar" name="status" nullable="false" default="pending" comment="Transaction status"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="PAYU_TRANSACTION_INCREMENT_ID">
+            <column name="increment_id"/>
+        </constraint>
+    </table>
+</schema>

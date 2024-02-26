@@ -1,6 +1,13 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © 2024 PayU Financial Services. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="PayU\EasyPlus\Model\Api\Data\GridInterface" type="PayU\EasyPlus\Model\Transaction" />
     <virtualType name="PayU\EasyPlus\Logger\VirtualHandler" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
@@ -19,6 +26,20 @@
     <type name="Magento\Payment\Model\Method\Logger">
         <arguments>
             <argument name="logger" xsi:type="object">PayU\EasyPlus\Logger\VirtualLogger</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="PayU\EasyPlus\Model\ResourceModel\Transaction\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">payu_transaction</argument>
+            <argument name="resourceModel" xsi:type="string">PayU\EasyPlus\Model\ResourceModel\Transaction</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="payu_transaction_grid_list_data_source" xsi:type="string">PayU\EasyPlus\Model\ResourceModel\Transaction\Grid\Collection</item>
+            </argument>
         </arguments>
     </type>
 </config>
