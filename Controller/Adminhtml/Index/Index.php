@@ -1,128 +1,135 @@
 <?php
 
-
 namespace PayU\EasyPlus\Controller\Adminhtml\Index;
 
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Registry;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use PayU\EasyPlus\Model\Api\Api;
+use PayU\EasyPlus\Model\Api\Factory;
 
-class Index extends \Magento\Backend\App\Action
+class Index extends Action
 {
-    /** @var \PayU\EasyPlus\Model\Api\Api  */
-    protected $_easyPlusApi;
+    /**
+     * @var string?
+     */
+    protected $code = null;
 
-    /** @var \Magento\Framework\Encryption\EncryptorInterface  */
-    protected $_encryptor;
+    /**
+     * @var Api
+     */
+    protected $easyPlusApi;
 
-    /** @var \Magento\Store\Model\StoreManagerInterface  */
-    protected $_storeManager;
+    /**
+     * @var EncryptorInterface
+     */
+    protected $encryptor;
 
-    protected $_scopeConfig;
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
 
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
 
-    /** @var \Magento\Framework\Registry|null  */
+    /**
+     * @var Registry?
+     */
     protected $coreRegistry = null;
 
-    /** @var null  */
-    protected $_code = null;
-
-    /** @var null  */
-    protected $_payUReference = null;
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
 
     public function __construct(
         Context $context,
-        \PayU\EasyPlus\Model\Api\Factory $apiFactory,
-        \Magento\Framework\Encryption\EncryptorInterface $encryptor,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-    )
-    {
+        Factory $apiFactory,
+        EncryptorInterface $encryptor,
+        StoreManagerInterface $storeManager,
+        Registry $registry,
+        ScopeConfigInterface $scopeConfig,
+        OrderRepositoryInterface $orderRepository,
+    ) {
         parent::__construct($context);
-        $this->_easyPlusApi = $apiFactory->create();
-        $this->_encryptor = $encryptor;
-        $this->_storeManager = $storeManager;
+
+        $this->easyPlusApi = $apiFactory->create();
+        $this->encryptor = $encryptor;
+        $this->storeManager = $storeManager;
         $this->coreRegistry = $registry;
-        $this->_scopeConfig = $scopeConfig;
+        $this->scopeConfig = $scopeConfig;
+        $this->orderRepository = $orderRepository;
     }
 
-
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     * @return ResponseInterface|ResultInterface
      */
     public function execute()
     {
-        // We need an order number
-        $order_id = $this->getRequest()->getPostValue('order_id');
+        $orderId = $this->getRequest()->getPostValue('order_id');
 
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $order = $objectManager->create('\Magento\Sales\Model\Order')->load($order_id);
+        $order = $this->orderRepository->get($orderId);
         $payment = $order->getPayment();
 
-        $this->_code = $payment->getData('method');
+        $this->code = $payment->getData('method');
+        $additionalInfo = $payment->getData('additional_information');
+        $payUReference = $additionalInfo["payUReference"];
 
-        $additional_info = $payment->getData('additional_information');
-
-        $this->_payUReference = $additional_info["fraud_details"]["return"]["payUReference"];
-
-
-        // We must get some config settings
-        $this->initializeApi();
-
-        $result = $this->_easyPlusApi->checkTransaction($this->_payUReference);
-
+        $this->initializeApi($order->getStoreId());
+        $result = $this->easyPlusApi->checkTransaction($payUReference);
         $return = $result->getData('return');
 
-        if(!$return->successful) {
-            $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
-            $resultJson->setData(["message" => "Could not determine order status", "suceess" => false]);
+        $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
+
+        if (!$return) {
+            $resultJson->setData([
+                'message' => 'Could not determine order status',
+                'success' => false
+            ]);
+
             return $resultJson;
         }
 
+        $resultJson->setData(['message' => 'Good', 'success' => true, 'data' => $return]);
 
-        $test = 1;
-
-        $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
-        $resultJson->setData(["message" => ("Good"), "suceess" => true]);
         return $resultJson;
     }
 
-
-
-    protected function initializeApi()
+    /**
+     * @param int $storeId
+     * @return void
+     */
+    protected function initializeApi($storeId)
     {
-        $this->_easyPlusApi->setSafeKey($this->getValue('safe_key'));
-        $this->_easyPlusApi->setUsername($this->getValue('api_username'));
-        $this->_easyPlusApi->setPassword($this->getValue('api_password'));
-        $this->_easyPlusApi->setMethodCode($this->_code);
+        $this->easyPlusApi->setSafeKey($this->getValue('safe_key', $storeId));
+        $this->easyPlusApi->setUsername($this->getValue('api_username', $storeId));
+        $this->easyPlusApi->setPassword($this->getValue('api_password', $storeId));
+        $this->easyPlusApi->setMethodCode($this->code);
     }
-
 
     public function getValue($key, $storeId = null)
     {
-        if(in_array($key, ['safe_key', 'api_password']))
-            return $this->_encryptor->decrypt($this->getConfigData($key, $storeId));
+        if (in_array($key, ['safe_key', 'api_password'])) {
+            return $this->encryptor->decrypt($this->getConfigData($key, $storeId));
+        }
 
         return $this->getConfigData($key, $storeId);
     }
 
-
     public function getConfigData($field, $storeId = null)
     {
-        $path = 'payment/' . $this->_code . '/' . $field;
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+        $path = 'payment/' . $this->code . '/' . $field;
+        return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
-
-
-
-
-
-
-
-
-
 }

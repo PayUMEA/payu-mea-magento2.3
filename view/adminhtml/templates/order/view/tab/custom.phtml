@@ -1,14 +1,14 @@
 <section class="admin__page-section custom-tab-content">
-    <h1>PayU EasyPlus</h1>
-    <button class="button" id="payu_easyplus_transstate">Get Transaction Status</button>
+    <button class="button" id="payu_easyplus_txn_status">Get Transaction Data</button>
+    <br />
+    <div id="txn_data"></div>
 </section>
 <script>
     require([
         "prototype"
     ], function () {
-        if(!window.PayUAjaxCheck) {
+        if (!window.PayUAjaxCheck) {
             window.PayUAjaxCheck = '<?php echo $block->getAjaxUrl(); ?>';
-           // window.PayUAjaxCheck = '<?php echo 'http://payu.nmcapetown.dynalias.org/magento/2.3.4/admin/payueasyplus/index/index' ?>';
             window.PayUAjaxFormKey = '<?php echo $block->getFormKey(); ?>';
             window.PayUAjaxOrderId = '<?php echo $this->getOrder()->getId(); ?>';
         }
