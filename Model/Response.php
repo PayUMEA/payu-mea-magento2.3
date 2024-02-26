@@ -14,6 +14,7 @@ namespace PayU\EasyPlus\Model;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
+use PayU\EasyPlus\Model\Api\Api;
 use PayU\EasyPlus\Model\Api\Factory;
 use PayU\EasyPlus\Model\Error\Code;
 
@@ -25,8 +26,17 @@ use PayU\EasyPlus\Model\Error\Code;
 class Response extends DataObject
 {
     protected $errorCode;
+
+    /**
+     * @var Api
+     */
     protected $api;
 
+    /**
+     * @param Code $errorCodes
+     * @param Factory $apiFactory
+     * @param array $data
+     */
     public function __construct(
         Code $errorCodes,
         Factory $apiFactory,
@@ -191,13 +201,15 @@ class Response extends DataObject
      * Process return from PayU after payment
      *
      * @param Order $order
+     * @param string $processId
+     * @param string $processClass
      * @return bool
      * @throws LocalizedException
      */
-    public function processReturn(Order $order): bool
+    public function processReturn(Order $order, $processId, $processClass): bool
     {
         $payment = $order->getPayment();
-        $payment->getMethodInstance()->process($this->getParams());
+        $payment->getMethodInstance()->process($this->getParams(), $processId, $processClass);
 
         /** @var Response $response */
         $response = $payment->getMethodInstance()->getResponse();
@@ -231,11 +243,12 @@ class Response extends DataObject
      *
      * @param array $data
      * @param Order $order
+     * @param string $processId
      * @throws LocalizedException
      */
-    public function processNotify($data, $order)
+    public function processNotify($data, $order, $processId, $processClass)
     {
         $payment = $order->getPayment();
-        $payment->getMethodInstance()->processNotification($data, $order);
+        $payment->getMethodInstance()->processNotification($data, $order, $processId, $processClass);
     }
 }

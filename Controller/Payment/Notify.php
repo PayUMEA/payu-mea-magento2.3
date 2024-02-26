@@ -30,12 +30,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
     public function execute()
     {
         $processId = uniqid();
-        $processString = self::class;
-
-        $this->_getSession()->setPayUProcessId($processId);
-        $this->_getSession()->setPayUProcessString($processString);
-
-        $this->logger->debug(['info' => "($processId) START $processString"]);
+        $processClass = self::class;
 
         $postData = file_get_contents("php://input");
         $sxe = simplexml_load_string($postData);
@@ -70,7 +65,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
         }
 
         $this->respond();
-        $this->response->processNotify($ipnData, $order);
+        $this->response->processNotify($ipnData, $order, $processId, $processClass);
 
         return $resultJson;
     }

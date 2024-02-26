@@ -359,6 +359,11 @@ class Api extends DataObject
             $to->setIsFraudDetected(true);
         }
 
+        if ($from->isPaymentMethodCc()) {
+            $to->setGatewayReference($from->getGatewayReference())
+                ->setCcLast4($to->encrypt(substr($from->getCcNumber(), -4)));
+        }
+
         // give generic info about transaction state
         if ($from->isPaymentSuccessful()) {
             $to->setIsTransactionApproved(true);
