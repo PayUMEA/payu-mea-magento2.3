@@ -1,7 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2024 PayU Financial Services. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">
     <router id="admin">
-        <route id="order_payueasyplus_tab" frontName="payueasyplus">
-            <module name="PayU_EasyPlus" />
+        <route id="payu_easyplus" frontName="payu_easyplus">
+            <module name="PayU_EasyPlus" before="Magento_Backend" />
         </route>
     </router>
 </config>
