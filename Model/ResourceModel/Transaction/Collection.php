@@ -32,6 +32,6 @@ class Collection extends AbstractCollection
             Transaction::class,
             \PayU\EasyPlus\Model\ResourceModel\Transaction::class
         );
-        //$this->_map['fields']['entity_id'] = 'main_table.entity_id';
+        $this->_map['fields']['entity_id'] = 'main_table.entity_id';
     }
 }
