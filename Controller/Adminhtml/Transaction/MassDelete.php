@@ -52,7 +52,7 @@ class MassDelete extends Action
             $record->delete();
             $recordDeleted++;
         }
-        $this->messageManager->addSuccess(__('A total of %1 record(s) have been deleted.', $recordDeleted));
+        $this->messageManager->addSuccessMessage(__('A total of %1 record(s) have been deleted.', $recordDeleted));
 
         return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
     }
