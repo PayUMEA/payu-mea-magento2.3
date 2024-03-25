@@ -33,97 +33,97 @@ class CheckTransactionState
     /**
      * @var string
      */
-    protected $processId;
+    protected string $processId;
 
     /**
      * @var LoggerInterface
      */
-    protected $_logger;
+    protected LoggerInterface $_logger;
 
     /**
      * @var Api
      */
-    protected $_easyPlusApi;
+    protected Api $_easyPlusApi;
 
     /**
      * @var EncryptorInterface
      */
-    protected $_encryptor;
+    protected EncryptorInterface $_encryptor;
 
     /**
      * @var StoreManagerInterface
      */
-    protected $_storeManager;
+    protected StoreManagerInterface $_storeManager;
 
     /**
      * @var ScopeConfigInterface
      */
-    protected $_scopeConfig;
+    protected ScopeConfigInterface $_scopeConfig;
 
     /**
      * @var OrderFactory
      */
-    protected $_orderFactory;
+    protected OrderFactory $_orderFactory;
 
     /**
      * @var SearchCriteriaBuilder
      */
-    protected $_searchCriteriaBuilder;
+    protected SearchCriteriaBuilder $_searchCriteriaBuilder;
 
     /**
      * @var Registry|null
      */
-    protected $_coreRegistry = null;
+    protected ?Registry $_coreRegistry = null;
 
     /**
-     * @var null
+     * @var string|null
      */
-    protected $_code = null;
+    protected ?string $_code = null;
 
     /**
-     * @var null
+     * @var string|null
      */
-    protected $_payUReference = null;
+    protected ?string $_payUReference = null;
 
     /**
-     * @var State *
+     * @var State
      */
-    private $_state;
+    private State $_state;
 
     /**
      * @var CollectionFactory
      */
-    protected $_orderCollectionFactory;
+    protected CollectionFactory $_orderCollectionFactory;
 
     /**
      * @var OrderSender
      */
-    private $_orderSender;
+    private OrderSender $_orderSender;
 
     /**
      * @var InvoiceSender
      */
-    private $_invoiceSender;
+    private InvoiceSender $_invoiceSender;
 
     /**
      * @var InvoiceService
      */
-    private $_invoiceService;
+    private InvoiceService $_invoiceService;
 
     /**
      * @var Transaction
      */
-    private $_transaction;
+    private Transaction $_transaction;
 
     /**
      * @var Config
      */
-    private $_orderConfig;
+    private Config $_orderConfig;
 
     /**
      * @var OrderRepositoryInterface
      */
-    private $_orderRepository;
+    private OrderRepositoryInterface $_orderRepository;
 
     /**
      * CheckTransactionState constructor.
@@ -236,7 +236,7 @@ class CheckTransactionState
     /**
      * @return Collection
      */
-    public function getOrderCollection()
+    public function getOrderCollection(): Collection
     {
         return $this->_orderCollectionFactory->create()
             ->addFieldToSelect('*')
@@ -249,7 +249,7 @@ class CheckTransactionState
     }
 
     /**
-     * @throws LocalizedException
+     * @throws LocalizedException|Exception
      */
     public function execute()
     {
@@ -310,7 +310,7 @@ class CheckTransactionState
                     break;
                 default:
 
-                    if (!$this->shouldDoCheck($order, $payment)) {
+                    if (!$this->shouldDoCheck($order)) {
                         $this->_logger->info("($processId) ($id) Check not timed");
                         break;
                     }
@@ -360,7 +360,7 @@ class CheckTransactionState
         $this->_logger->info("PayU CRON Ended, PID: $processId");
     }
 
-    protected function shouldDoCheck(&$order, $payment)
+    protected function shouldDoCheck($order): bool
     {
         $createdAt = strtotime($order->getCreatedAt());
         $updatedAt = strtotime($order->getUpdatedAt());
