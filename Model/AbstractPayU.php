@@ -24,7 +24,7 @@ abstract class AbstractPayU extends AbstractMethod
 
     const REQUEST_TYPE_FINALIZE = 'FINALIZE';
 
-    const TRANS_STATE_NEW = 'PAYMENT';
+    const TRANS_STATE_NEW = 'NEW';
 
     const TRANS_STATE_PROCESSING = 'PROCESSING';
 

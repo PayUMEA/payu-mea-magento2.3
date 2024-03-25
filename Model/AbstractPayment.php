@@ -18,9 +18,8 @@ use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Framework\Exception\AlreadyExistsException;
-use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Lock\LockManagerInterface;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
@@ -31,8 +30,6 @@ use Magento\Payment\Model\Method\Logger;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
-use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
@@ -41,17 +38,15 @@ use Magento\Sales\Model\Order\Config;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Payment;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\Service\InvoiceService;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use PayU\EasyPlus\Helper\Data as FrontendHelper;
 use PayU\EasyPlus\Helper\DataFactory;
 use PayU\EasyPlus\Model\Api\Api;
 use PayU\EasyPlus\Model\Api\Factory;
-use PayU\EasyPlus\Model\ResourceModel\TransactionFactory as PayUTransactionResourceFactory;
-use PayU\EasyPlus\Model\TransactionFactory as PayUTransactionFactory;
 
 /**
  * Redirect payment method model for all payment methods except Discovery Miles
@@ -66,7 +61,7 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * How long to wait for transaction to become unlocked
      */
-    private const LOCK_TIMEOUT = 3;
+    private const LOCK_TIMEOUT = 5;
 
     /**
      * Static lock prefix for locking
@@ -126,10 +121,8 @@ abstract class AbstractPayment extends AbstractPayU
     protected $_session                     = false;
     protected $_response                    = null;
     protected $_paymentData                 = false;
-    protected $_payuReference               = '';
     protected $_minAmount                   = null;
     protected $_maxAmount                   = null;
-    protected $_redirectUrl                 = '';
     protected $_supportedCurrencyCodes      = [ 'NGN', 'ZAR', 'KES', 'TZS', 'ZMW', 'USD'];
 
     /**
@@ -138,12 +131,6 @@ abstract class AbstractPayment extends AbstractPayU
      * @var array
      */
     protected $_debugReplacePrivateDataKeys = ['Safekey'];
-    /**
-     * Payment additional information key for payment action
-     *
-     * @var string
-     */
-    protected $_isOrderPaymentActionKey = 'is_order_action';
 
     /**
      * @var TransactionRepositoryInterface
@@ -186,16 +173,6 @@ abstract class AbstractPayment extends AbstractPayU
      */
     protected LockManagerInterface $lockManager;
 
-    /**
-     * @var PayUTransactionFactory
-     */
-    protected $payUTransactionFactory;
-
-    /**
-     * @var PayUTransactionResourceFactory
-     */
-    protected $payUTransactionResourceFactory;
-
     public function __construct(
         Context $context,
         Registry $registry,
@@ -223,8 +200,6 @@ abstract class AbstractPayment extends AbstractPayU
         InvoiceSender $invoiceSender,
         Config $orderConfig,
         LockManagerInterface $lockManager,
-        PayUTransactionFactory $payUTransactionFactory,
-        PayUTransactionResourceFactory $payUTransactionResourceFactory,
         array $data = []
     ) {
         parent::__construct(
@@ -260,8 +235,6 @@ abstract class AbstractPayment extends AbstractPayU
         $this->_invoiceRepository = $invoiceRepository;
         $this->orderConfig = $orderConfig;
         $this->lockManager = $lockManager;
-        $this->payUTransactionFactory = $payUTransactionFactory;
-        $this->payUTransactionResourceFactory = $payUTransactionResourceFactory;
 
         $this->initializeApi();
 
@@ -272,8 +245,9 @@ abstract class AbstractPayment extends AbstractPayU
     /**
      * Store setter
      *
-     * @param \Magento\Store\Model\Store|int $store
+     * @param Store|int $store
      * @return $this
+     * @throws NoSuchEntityException
      */
     public function setStore($store)
     {
@@ -374,7 +348,7 @@ abstract class AbstractPayment extends AbstractPayU
      * @return void
      * @throws LocalizedException In  of Declined or Error response from Authorize.net
      */
-    public function checkResponseCode(): void
+    public function checkTransactionState(): void
     {
         $state = $this->getResponse()->getTransactionState();
 
@@ -399,8 +373,6 @@ abstract class AbstractPayment extends AbstractPayU
 
     /**
      * Check transaction id came with response data
-     *
-     * @return true in case of right transaction id
      * @throws LocalizedException In case of bad transaction id.
      */
     public function checkTransId()
@@ -410,8 +382,6 @@ abstract class AbstractPayment extends AbstractPayU
                 __('Payment verification error: invalid PayU reference')
             );
         }
-
-        return true;
     }
 
     /**
@@ -439,6 +409,21 @@ abstract class AbstractPayment extends AbstractPayU
     }
 
     /**
+     * Order payment
+     *
+     * @param InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     * @throws LocalizedException
+     */
+    public function order(InfoInterface $payment, $amount)
+    {
+        $this->_setupTransaction($payment, $amount);
+
+        return $this;
+    }
+
+    /**
      * Setup transaction before redirect
      *
      * @param InfoInterface $payment
@@ -454,9 +439,6 @@ abstract class AbstractPayment extends AbstractPayU
         /** @var Order $order */
         $order = $payment->getOrder();
         $order->setCanSendNewEmailFlag(false);
-        $payment->setBaseAmountOrdered($order->getBaseTotalDue());
-        $payment->setAmountOrdered($order->getTotalDue());
-        $payment->getMethodInstance()->setIsInitializeNeeded(true);
 
         $helper = $this->_dataFactory->create('frontend');
         $request = $this->generateRequestFromOrder($order, $helper);
@@ -465,25 +447,18 @@ abstract class AbstractPayment extends AbstractPayU
         try {
             $response = $this->_easyPlusApi->doSetTransaction($request->getData());
 
-            $this->debugData(['info' => 'SetTransaction operation']);
+            $this->debugData(['info' => 'SetTransaction']);
             $this->debugData(['request' => $request->getData()]);
             $this->debugData(['response' => $response]);
 
             if ($response->return->successful) {
                 $payUReference = $response->return->payUReference;
 
-                // set PayU session variables
+                // Set PayU session variables
                 $this->_session->setCheckoutReference($payUReference);
                 $this->_session->setCheckoutOrderIncrementId($order->getIncrementId());
                 $this->_easyPlusApi->setPayUReference($payUReference);
                 $this->_session->setCheckoutRedirectUrl($this->_easyPlusApi->getRedirectUrl());
-
-                // set checkout session variables
-                $this->_checkoutSession->setLastQuoteId($order->getQuoteId())
-                    ->setLastSuccessQuoteId($order->getQuoteId());
-                $this->_checkoutSession->setLastOrderId($order->getId())
-                    ->setLastRealOrderId($order->getIncrementId())
-                    ->setLastOrderStatus($order->getStatus());
 
                 $message = 'Amount of %1 is pending approval. Redirecting to PayU.<br/>'
                     . 'PayU reference "%2"<br/>';
@@ -494,8 +469,9 @@ abstract class AbstractPayment extends AbstractPayU
                 );
 
                 $order->setState(Order::STATE_PENDING_PAYMENT)
-                    ->setStatus(Order::STATE_PENDING_PAYMENT);
-                $order->addStatusHistoryComment($message);
+                    ->setStatus(Order::STATE_PENDING_PAYMENT)
+                    ->setCustomerNoteNotify(false)
+                    ->addCommentToStatusHistory($message);
 
                 $payment->setSkipOrderProcessing(true);
                 $payment->setAdditionalInformation('payUReference', $payUReference);
@@ -509,7 +485,6 @@ abstract class AbstractPayment extends AbstractPayU
         } catch (Exception $e) {
             $this->debugData([
                 'error' => $e->getMessage(),
-                'request' => $request->getData(),
                 'response' => $response
             ]);
 
@@ -537,7 +512,7 @@ abstract class AbstractPayment extends AbstractPayU
         //operate with order
         $orderIncrementId = $response->getInvoiceNum();
 
-        $message = 'Payment transaction of amount of %1 was canceled by user on PayU.<br/>' . 'PayU reference "%2"<br/>';
+        $message = 'Payment transaction of amount of %1 was canceled by user on PayU.<br/>' . 'PayU reference: %2<br/>';
 
         $isError = false;
 
@@ -559,8 +534,7 @@ abstract class AbstractPayment extends AbstractPayU
                     $payUReference
                 );
 
-                $order->addStatusHistoryComment($message);
-                $order->cancel();
+                $order->addCommentToStatusHistory($message);
                 $this->_orderRepository->save($order);
             } else {
                 $isError = true;
@@ -589,28 +563,18 @@ abstract class AbstractPayment extends AbstractPayU
      * @return void
      * @throws LocalizedException
      */
-    public function processNotification($data, $order, string $processId, string $processClass)
+    public function processNotification(Order $order, array $data, string $processId, string $processClass)
     {
         if ($order->getState() == strtolower(AbstractPayU::TRANS_STATE_PROCESSING) ||
             $order->getStatus() == strtolower(AbstractPayU::TRANS_STATE_PROCESSING)
         ) {
             $this->debugData(['info' => "IPN ($processId): Order already processed.", 'response' => $data]);
-            return;
-        }
-
-        $incrementId = $order->getIncrementId();
-        $canProceed = $this->canProceed($incrementId, $processId, $processClass);
-
-        if (!$canProceed) {
-            $this->debugData(['info' => "($processId) $processClass: another process is busy with transaction."]);
 
             return;
         }
 
-        $this->debugData(['info' => "($processId) $processClass: START."]);
-
-        $payuReference = $data['PayUReference'];
-        $response = $this->_easyPlusApi->doGetTransaction($payuReference, $this);
+        $payUReference = $data['PayUReference'];
+        $response = $this->_easyPlusApi->doGetTransaction($payUReference, $this);
         $resultCode = $response->getResultCode();
 
         $transactionNotes = "<strong>-----PAYU NOTIFICATION RECEIVED---</strong><br />";
@@ -652,7 +616,7 @@ abstract class AbstractPayment extends AbstractPayU
                 $transactionNotes .= "Order Amount: " . $amountDue . "<br />";
                 $transactionNotes .= "Amount Paid: " . $amountPaid . "<br />";
                 $transactionNotes .= "Merchant Reference : " . $response->getInvoiceNum() . "<br />";
-                $transactionNotes .= "PayU Reference: " . $payuReference . "<br />";
+                $transactionNotes .= "PayU Reference: " . $payUReference . "<br />";
                 $transactionNotes .= "PayU Payment Status: " . $response->getTransactionState() . "<br /><br />";
 
                 if (!empty($paymentMethods)) {
@@ -691,8 +655,7 @@ abstract class AbstractPayment extends AbstractPayU
                 }
 
                 $this->_orderRepository->save($order);
-                $this->debugData(['info' => "IPN ($processId): Processing complete.", 'response' => $data]);
-                $this->updateTransactionLog($incrementId, $processId);
+                $this->debugData(['info' => "IPN ($processId): Processing complete."]);
             } else {
                 $transactionNotes = '<strong>Payment unsuccessful: </strong><br />';
                 $transactionNotes .= "PayU Reference: " . $response->getTranxId() . "<br />";
@@ -725,16 +688,15 @@ abstract class AbstractPayment extends AbstractPayU
      * @param string $params PayU reference
      * @param string $processId
      * @param string $processClass
-     * @return void
+     * @return bool
      * @throws LocalizedException In case of validation error or order capture error
      * @throws Exception
      */
-    public function process($params, $processId, $processClass)
+    public function process(string $params, string $processId, string $processClass): bool
     {
         $isError = false;
         $response = $this->_easyPlusApi->doGetTransaction($params, $this);
-        $this->setResponseData($response->getReturn());
-        $response = $this->getResponse();
+        $this->_response = $response;
         $incrementId = $response->getInvoiceNum();
 
         if ($incrementId) {
@@ -744,23 +706,11 @@ abstract class AbstractPayment extends AbstractPayU
             );
             $payment = $order->getPayment();
 
-            $canProceed = $this->canProceed($incrementId, $processId, $processClass);
-
-            if (!$canProceed) {
-                $this->debugData([
-                    'info' => "($processId) ($incrementId) $processClass: another process is busy with transaction."
-                ]);
-
-                return;
-            }
-
             $this->debugData(['info' => "($processId) ($incrementId) $processClass: START."]);
 
             // check payment method
             if (!$payment || $payment->getMethod() != $this->getCode()) {
-                throw new LocalizedException(
-                    __("This payment didn't work out because we can't find this order.")
-                );
+                return false;
             }
 
             if ($order->getId()) {
@@ -774,22 +724,15 @@ abstract class AbstractPayment extends AbstractPayU
             } else {
                 $isError = true;
             }
-
-            $this->updateTransactionLog($incrementId, $processId);
         } else {
             $isError = true;
         }
 
         if ($isError) {
-            $responseText = $this->_dataFactory->create('frontend')
-                ->wrapGatewayError($response->getResultMessage());
-
-            $responseText = $responseText && !$response->isPaymentSuccessful()
-                ? $responseText
-                : __("This payment didn't work out because we can't find this order.");
-
-            throw new LocalizedException($responseText);
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -811,8 +754,8 @@ abstract class AbstractPayment extends AbstractPayU
         $this->_importToPayment($response, $payment);
 
         try {
-            $this->checkResponseCode();
             $this->checkTransId();
+            $this->checkTransactionState();
         } catch (Exception $e) {
             $this->declineOrder($order, $response, true);
             throw $e;
@@ -862,7 +805,7 @@ abstract class AbstractPayment extends AbstractPayU
     {
         $id = $order->getIncrementId();
 
-        if (!$this->lockManager->lock(self::LOCK_PREFIX . $id)) {
+        if (!$this->lockManager->lock(self::LOCK_PREFIX . $id, self::LOCK_TIMEOUT)) {
             $message = "($processId) ($id) $processClass: could not acquire lock for invoice txn, skipping.";
             $this->debugData(['info' => $message]);
 
@@ -932,8 +875,6 @@ abstract class AbstractPayment extends AbstractPayU
         } finally {
             $this->lockManager->unlock(self::LOCK_PREFIX . $id);
         }
-
-        $this->clearProcessingData();
     }
 
     /**
@@ -988,7 +929,6 @@ abstract class AbstractPayment extends AbstractPayU
     public function declineOrder(Order $order, Response $response, bool $voidPayment = false)
     {
         $payment = $order->getPayment();
-        $this->_importToPayment($response, $payment);
 
         try {
             if (
@@ -1095,7 +1035,7 @@ abstract class AbstractPayment extends AbstractPayU
 
         if ($payment->getIsTransactionApproved()) {
             $message = __(
-                'Transaction %1 has been approved. Amount %2. PayU transaction status: "%3"',
+                'Transaction %1 has been approved. <br />Amount %2.<br />PayU transaction status: %3',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
@@ -1108,21 +1048,21 @@ abstract class AbstractPayment extends AbstractPayU
             return;
         } elseif ($payment->getIsTransactionPending()) {
             $message = __(
-                'Transaction %1 is pending payment. Amount %2. PayU transaction status: "%3"',
+                'Transaction %1 is pending payment. <br />Amount %2. <br />PayU transaction status: %3',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
         } elseif ($payment->getIsTransactionDenied()) {
             $message = __(
-                'Transaction %1 has been voided/declined. Amount %2. PayU transaction status: "%3".',
+                'Transaction %1 has been voided/declined. <br />Amount %2. <br />PayU transaction status: %3.',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
             );
         } elseif ($payment->getIsTransactionProcessing()) {
             $message = __(
-                'Transaction %1 is still in processing. Amount %2. PayU transaction status: "%3".',
+                'Transaction %1 is still in processing. <br />Amount %2. <br />PayU transaction status: %3.',
                 $transactionId,
                 $payment->getOrder()->getBaseCurrency()->formatTxt($payment->getAmountOrdered()),
                 $response->getTransactionState()
@@ -1215,37 +1155,6 @@ abstract class AbstractPayment extends AbstractPayU
         }
     }
 
-    /**
-     * PayU redirect url
-     *
-     * @return mixed
-     */
-    public function getCheckoutRedirectUrl()
-    {
-        return $this->_session->getCheckoutRedirectUrl();
-    }
-
-    /**
-     * Get transaction with type order
-     *
-     * @param OrderPaymentInterface $payment
-     * @return false | TransactionInterface
-     * @throws InputException
-     */
-    protected function getOrderTransaction($payment)
-    {
-        return $this->transactionRepository->getByTransactionType(
-            Transaction::TYPE_ORDER,
-            $payment->getId()
-        );
-    }
-
-    protected function clearProcessingData()
-    {
-        $this->_session->unsPayUProcessId();
-        $this->_session->unsPayUProcessString();
-    }
-
     protected function clearSessionData()
     {
         $this->_session->unsCheckoutReference();
@@ -1253,67 +1162,5 @@ abstract class AbstractPayment extends AbstractPayU
         $this->_session->unsCheckoutRedirectUrl();
 
         $this->_checkoutSession->resetCheckout();
-    }
-
-    /**
-     * @param string $incrementId
-     * @param string $processId
-     * @param string $processClass
-     * @return bool
-     * @throws Exception
-     */
-    protected function canProceed(string $incrementId, string $processId, string $processClass): bool
-    {
-        $transaction = $this->payUTransactionFactory->create();
-        $resourceModel = $this->payUTransactionResourceFactory->create();
-        $resourceModel->load($transaction, $incrementId, 'increment_id');
-
-        if ($transaction->getId() > 0 && $transaction->getLock() && $transaction->getStatus() === 'processing') {
-            return false;
-        }
-
-        $transaction->setIncrementId($incrementId)
-            ->setLock(true)
-            ->setStatus('processing')
-            ->setProcessId($processId)
-            ->setProcessClass($processClass);
-
-        try {
-            $resourceModel->save($transaction);
-        } catch (AlreadyExistsException $exception) {
-            $this->debugData(['error' => "$incrementId ($processId) $processClass attempted to process PayU transaction"]);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param string $incrementId
-     * @param string $processId
-     * @return void
-     * @throws AlreadyExistsException
-     */
-    protected function updateTransactionLog(string $incrementId, string $processId)
-    {
-        $transaction = $this->payUTransactionFactory->create();
-        $resourceModel = $this->payUTransactionResourceFactory->create();
-        $resourceModel->load($transaction, $incrementId, 'increment_id');
-
-        if ($transaction->getId() === 0) {
-            return;
-        }
-
-        if ($transaction->getProcessId() !== $processId) {
-            return;
-        }
-
-        try {
-            $transaction->setStatus('complete');
-            $transaction->setLock(false);
-            $resourceModel->save($transaction);
-        } catch (AlreadyExistsException $exception) {
-            // It's fine we are just updating
-        }
     }
 }

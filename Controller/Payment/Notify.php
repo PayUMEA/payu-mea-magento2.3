@@ -11,6 +11,7 @@
 
 namespace PayU\EasyPlus\Controller\Payment;
 
+use Exception;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
@@ -26,6 +27,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
     /**
      * Process Instant Payment Notification (IPN) from PayU
      * @throws NoSuchEntityException|LocalizedException
+     * @throws Exception
      */
     public function execute()
     {
@@ -35,7 +37,9 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
         $postData = file_get_contents("php://input");
         $sxe = simplexml_load_string($postData);
 
-        $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON)->setJsonData('{}');
+        $resultJson = $this->resultFactory
+            ->create(ResultFactory::TYPE_JSON)
+            ->setJsonData('{}');
 
         if (empty($sxe)) {
             $this->respond('500', 'Instant Payment Notification data is empty');
@@ -52,6 +56,18 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
         }
 
         $incrementId = $ipnData['MerchantReference'];
+        $canProceed = $this->responseProcessor->canProceed($incrementId, $processId, $processClass);
+
+        if (!$canProceed) {
+            $this->respond();
+
+            return $resultJson;
+        }
+
+        $this->logger->debug([
+            'info' => "($processId) ($incrementId) $processClass START"
+        ]);
+
         /** @var Order $order */
         $order = $incrementId ? $this->_orderFactory->create()->loadByIncrementIdAndStoreId(
             $incrementId,
@@ -65,7 +81,8 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
         }
 
         $this->respond();
-        $this->response->processNotify($ipnData, $order, $processId, $processClass);
+        $this->response->processNotify($order, $ipnData, $processId, $processClass);
+        $this->responseProcessor->updateTransactionLog($incrementId, $processId);
 
         return $resultJson;
     }
