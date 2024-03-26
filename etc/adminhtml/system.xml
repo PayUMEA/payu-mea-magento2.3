@@ -20,21 +20,32 @@
                     <comment>The status of orders to be processed</comment>
                     <source_model>PayU\EasyPlus\Model\System\Config\Source\Order\Status\Pendingpayment</source_model>
                 </field>
-                <field id="payumea_cron_delay" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="payumea_cron_delay" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Delay (Minutes)</label>
                     <comment>
                         How long after initial order will the CRON start checking the order status, leave empty for default
                     </comment>
                 </field>
             </group>
-            <group id="payumea_redirect_config" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_txn_log" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>PayU Transaction Log Cleaner</label>
+                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="keep_log" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Keep Log (Days)</label>
+                    <comment>How many days logs can be kept</comment>
+                </field>
+            </group>
+            <group id="payumea_redirect_config" translate="label" type="text" sortOrder="102" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU Redirect Settings</label>
                 <field id="bypass_payu_redirect" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Disable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
-            <group id="payumea_creditcard" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_creditcard" translate="label" type="text" sortOrder="103" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Credit Card</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -125,7 +136,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_payflex" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_payflex" translate="label" type="text" sortOrder="104" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Payflex</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -210,7 +221,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_ebucks" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_ebucks" translate="label" type="text" sortOrder="105" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA eBucks</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -295,7 +306,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_eftpro" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_eftpro" translate="label" type="text" sortOrder="106" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Pay by EFT</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -380,7 +391,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_discoverymiles" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_discoverymiles" translate="label" type="text" sortOrder="107" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Discovery Miles</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -465,7 +476,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_mobicred" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_mobicred" translate="label" type="text" sortOrder="108" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Mobicred</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -550,7 +561,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_ucount" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_ucount" translate="label" type="text" sortOrder="109" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Ucount</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -635,7 +646,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_rcs" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_rcs" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA RCS</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -720,7 +731,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_rcs_plc" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_rcs_plc" translate="label" type="text" sortOrder="111" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA RCS PLC</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -805,7 +816,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_fasta" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_fasta" translate="label" type="text" sortOrder="112" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA FASTA Instant Credit</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -890,7 +901,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_mpesa" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_mpesa" translate="label" type="text" sortOrder="113" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MPESA</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -975,7 +986,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_airtel_money" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_airtel_money" translate="label" type="text" sortOrder="114" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Airtel Money</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1060,7 +1071,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_mobile_banking" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_mobile_banking" translate="label" type="text" sortOrder="115" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Mobile Banking</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1145,7 +1156,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_mtn_mobile" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_mtn_mobile" translate="label" type="text" sortOrder="116" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MTN Mobile</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1230,7 +1241,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_tigopesa" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_tigopesa" translate="label" type="text" sortOrder="117" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Tigopesa</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1315,7 +1326,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_equitel" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_equitel" translate="label" type="text" sortOrder="118" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA Equitel</label>
                 <comment>
                     <![CDATA[<a href="https://payu.co.za/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1400,7 +1411,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_moretyme" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_moretyme" translate="label" type="text" sortOrder="119" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU MEA MoreTyme</label>
                 <comment>
                     <![CDATA[<a href="https://southafrica.payu.com/" target="_blank">Click here to sign up for PayU account</a>]]>
@@ -1485,7 +1496,7 @@
                     <frontend_class>validate-number</frontend_class>
                 </field>
             </group>
-            <group id="payumea_capitec_pay" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="payumea_capitec_pay" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>PayU Capitec Pay</label>
                 <comment>
                     <![CDATA[<a href="https://southafrica.payu.com/" target="_blank">Click here to sign up for PayU account</a>]]>
