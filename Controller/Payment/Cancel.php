@@ -26,17 +26,11 @@ class Cancel extends AbstractAction
      */
     public function execute()
     {
-        /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
-        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-
         $orderId = '';
         $processId = uniqid();
-        $processString = self::class;
-
-        $this->logger->debug(['info' => "($processId) START $processString"]);
 
         try {
-            $payu = $this->_initPayUReference();
+            $payUReference = $this->getPayUReference();
 
             // if there is an order - cancel it
             $orderId = $this->_getCheckoutSession()->getLastOrderId() ??
@@ -45,13 +39,13 @@ class Cancel extends AbstractAction
                 $this->_getCheckoutSession()->getData('last_success_quote_id');
 
             /** @var Order $order */
-            $order = $orderId ? $this->_orderRepository->get($orderId) : false;
+            $order = $orderId ? $this->_orderRepository->get($orderId) : null;
 
-            if ($payu &&
+            if ($payUReference &&
                 $order &&
                 $order->getQuoteId() == $quoteId
             ) {
-                $this->response->setData('params', $payu);
+                $this->response->setData('params', $payUReference);
 
                 $this->response->processCancel($order);
 
@@ -60,7 +54,7 @@ class Cancel extends AbstractAction
                 );
             } else {
                 $this->messageManager->addErrorMessage(
-                    __('Payment unsuccessful. Failed to reload cart.')
+                    __('Payment cancellation unsuccessful. Order not found.')
                 );
             }
         } catch (LocalizedException $localizedException) {
@@ -73,6 +67,8 @@ class Cancel extends AbstractAction
 
         $this->_returnCustomerQuote(true);
 
-        return $resultRedirect->setPath('checkout/cart');
+        return $this->resultFactory
+            ->create(ResultFactory::TYPE_REDIRECT)
+            ->setPath('checkout/cart');
     }
 }

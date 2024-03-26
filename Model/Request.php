@@ -61,11 +61,11 @@ class Request extends DataObject
     public function setConstantData(
         AbstractPayment $paymentMethod,
         Order $order,
-        $helper
+        Data $helper
     ) {
-        $additional_information = [
+        $additionalInformation = [
             'merchantReference'         => $order->getIncrementId(),
-            'notificationUrl'           => $helper->getNotificationUrl($paymentMethod->getCode()),
+            'notificationUrl'           => 'https://sacred-sincere-condor.ngrok-free.app/payu_easyplus/payment/notify',//$helper->getNotificationUrl($paymentMethod->getCode()),
             'cancelUrl'                 => $helper->getCancelUrl($paymentMethod->getCode()),
             'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
             'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),
@@ -75,13 +75,13 @@ class Request extends DataObject
         ];
 
         if (method_exists($paymentMethod, 'setMethodAdditionalInformation')) {
-            $paymentMethod->setMethodAdditionalInformation($additional_information);
+            $additionalInformation = $paymentMethod->setMethodAdditionalInformation($additionalInformation);
         }
 
         $this->setData('Api', $paymentMethod->getApi()->getApiVersion())
             ->setData('Safekey', $paymentMethod->getApi()->getSafeKey())
             ->setData('TransactionType', 'PAYMENT')
-            ->setData('AdditionalInformation', $additional_information);
+            ->setData('AdditionalInformation', $additionalInformation);
 
         return $this;
     }

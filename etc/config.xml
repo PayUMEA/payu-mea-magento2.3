@@ -13,6 +13,10 @@
                 <order_status>pending,pending_payment</order_status>
                 <payumea_cron_delay>5</payumea_cron_delay>
             </payumea_cron>
+            <payumea_txn_log>
+                <enable>1</enable>
+                <keep_log>30</keep_log>
+            </payumea_txn_log>
             <payumea_creditcard>
                 <model>PayU\EasyPlus\Model\CreditCard</model>
                 <active>0</active>

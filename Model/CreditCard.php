@@ -11,14 +11,8 @@
 
 namespace PayU\EasyPlus\Model;
 
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Payment\Model\InfoInterface;
-
 /**
  * Payment model for payment method CreditCard
- *
- * @SuppressWarnings(PHPMD.TooManyFields)
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CreditCard extends AbstractPayment
 {
@@ -32,33 +26,13 @@ class CreditCard extends AbstractPayment
     protected $_code = self::CODE;
 
     /**
-     * Order payment
-     *
-     * @param InfoInterface| Payment $payment
-     * @param float $amount
-     * @return $this
-     * @throws LocalizedException
+     * @param $additionalInformation
+     * @return array
      */
-    public function order(InfoInterface $payment, $amount)
+    public function setMethodAdditionalInformation($additionalInformation): array
     {
-        $payURedirect = $this->_session->getCheckoutRedirectUrl();
-        if (!$payURedirect) {
-            return $this->_setupTransaction($payment, $amount);
-        }
+        $additionalInformation['showBudget'] = (1 == $this->getConfigData('budget')) ? "True" : "False";
 
-        $payment->setSkipOrderProcessing(true);
-
-        $payment->getOrder()->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
-            ->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
-
-        return $this;
+        return $additionalInformation;
     }
-
-    /**
-     * @param $additional_information
-     */
-    public function setMethodAdditionalInformation(&$additional_information) {
-        $additional_information['showBudget'] = (1==$this->getConfigData('budget')) ? "True" : "False";
-    }
-
 }

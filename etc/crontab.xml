@@ -10,5 +10,8 @@
         <job name="payu_cronjob" instance="PayU\EasyPlus\Cron\CheckTransactionState" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+        <job name="payu_log_cronjob" instance="PayU\EasyPlus\Cron\CleanTransactionLog" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
     </group>
 </config>

@@ -18,6 +18,8 @@ class Redirect extends AbstractAction
      */
     public function execute()
     {
+        $message = 'Unable to redirect to PayU.';
+
         /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
@@ -25,23 +27,21 @@ class Redirect extends AbstractAction
             $url = $this->_getSession()->getData('checkout_redirect_url', true);
 
             if ($url) {
-                $this->_getSession()->unsCheckoutRedirectUrl();
-
                 return $resultRedirect->setPath($url);
             } else {
                 $this->messageManager->addErrorMessage(
-                    __('Invalid redirect url. Unable to redirect to PayU.')
+                    __('No redirect url. Unable to redirect to PayU.')
                 );
             }
         } catch (Exception $exception) {
             $this->logger->debug(['error' => "Exception: " . $exception->getMessage()]);
             $this->messageManager->addExceptionMessage(
                 $exception,
-                __('Unable to redirect to PayU. Server error encountered')
+                __($message)
             );
         }
 
-        $this->_returnCustomerQuote(true, __('Unable to redirect to PayU. Server error encountered'));
+        $this->_returnCustomerQuote();
 
         return $resultRedirect->setPath('checkout/cart');
     }
