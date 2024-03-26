@@ -199,7 +199,7 @@ class CheckTransactionState
         if (!$response->getTransactionState()
             || (!in_array(
                 $response->getTransactionState(),
-                ['PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED']
+                ['NEW', 'PROCESSING', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED']
             ))
         ) {
             $this->_logger->info("($this->processId) No transactionState");
@@ -306,7 +306,7 @@ class CheckTransactionState
                 case AbstractPayU::TRANS_STATE_FAILED:
                 case AbstractPayU::TRANS_STATE_EXPIRED:
                 case AbstractPayU::TRANS_STATE_TIMEOUT:
-                    $this->_logger->info(" ($id) Already Success Status");
+                    $this->_logger->info(" ($id) Transaction in a final state: $stateTest");
                     break;
                 default:
 

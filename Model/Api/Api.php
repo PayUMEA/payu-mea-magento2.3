@@ -13,53 +13,118 @@ namespace PayU\EasyPlus\Model\Api;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Store\Model\ScopeInterface;
 use PayU\EasyPlus\Model\AbstractPayment;
+use PayU\EasyPlus\Model\Response;
 use PayU\EasyPlus\Model\Response\Factory;
 use Psr\Log\LoggerInterface;
+use SoapClient;
 
 class Api extends DataObject
 {
-    private static $ns = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd';
-
-    protected $scopeConfig;
-    private static $_soapClient;
-
-    // @var string The base sandbox URL for the PayU API endpoint.
-    protected $sandboxUrl = 'https://staging.payu.co.za/service/PayUAPI';
-    protected $sandboxCheckoutUrl = 'https://staging.payu.co.za/rpp.do?PayUReference=%s';
-
-    // @var string The base live URL for the PayU API endpoint.
-    protected $liveUrl = 'https://secure.payu.co.za/service/PayUAPI';
-    protected $liveCheckoutUrl = 'https://secure.payu.co.za/rpp.do?PayUReference=%s';
-
-    // @var string The PayU safe key to be used for requests.
-    protected $safeKey;
-
-    // @var string|null The version of the PayU API to use for requests.
-    protected $apiVersion = 'ONE_ZERO';
-
-    protected $username;
-    protected $password;
-    protected $merchantRef;
-    protected $payuReference;
-    protected $methodCode;
-
-    /** var PayU\EasyPlus\Model\Response */
-    protected $response;
-
-    /** var PayU\EasyPlus\Model\Response\Factory */
-    protected $responseFactory;
+    /**
+     * @var string
+     */
+    private static string $ns = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd';
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var ScopeConfigInterface
      */
-    protected $_logger;
+    protected ScopeConfigInterface $scopeConfig;
 
-    protected $wsdlUrl;
-    protected $checkoutUrl;
+    /**
+     * @var ?SoapClient
+     */
+    private static ?SoapClient $_soapClient = null;
 
+    /**
+     * @var string
+     */
+    protected string $sandboxUrl = 'https://staging.payu.co.za/service/PayUAPI';
+
+    /**
+     * @var string
+     */
+    protected string $sandboxCheckoutUrl = 'https://staging.payu.co.za/rpp.do?PayUReference=%s';
+
+    /**
+     * @var string
+     */
+    protected string $liveUrl = 'https://secure.payu.co.za/service/PayUAPI';
+
+    /**
+     * @var string
+     */
+    protected string $liveCheckoutUrl = 'https://secure.payu.co.za/rpp.do?PayUReference=%s';
+
+    /**
+     * @var string
+     */
+    protected string $safeKey;
+
+    /**
+     * @var string
+     */
+    protected string $apiVersion = 'ONE_ZERO';
+
+    /**
+     * @var string
+     */
+    protected string $username;
+
+    /**
+     * @var string
+     */
+    protected string $password;
+
+    /**
+     * @var string
+     */
+    protected string $merchantRef;
+
+    /**
+     * @var string
+     */
+    protected string $payuReference;
+
+    /**
+     * @var string
+     */
+    protected string $methodCode;
+
+    /**
+     * @var Response
+     */
+    protected Response $response;
+
+    /**
+     * @var Factory
+     */
+    protected Factory $responseFactory;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected LoggerInterface $_logger;
+
+    /**
+     * @var string
+     */
+    protected string $wsdlUrl;
+
+    /**
+     * @var string
+     */
+    protected string $checkoutUrl;
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Factory $responseFactory
+     * @param LoggerInterface $logger
+     * @param array $data
+     */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         Factory $responseFactory,
@@ -70,8 +135,8 @@ class Api extends DataObject
 
         parent::__construct($data);
 
-        $this->responseFactory = $responseFactory;
         $this->_logger = $logger;
+        $this->responseFactory = $responseFactory;
     }
 
     /**
@@ -217,9 +282,9 @@ class Api extends DataObject
     }
 
     /**
-     * @return \PayU\EasyPlus\Model\Response The return data.
+     * @return Response The return data.
      */
-    public function getResponse()
+    public function getResponse(): Response
     {
         return $this->response;
     }
@@ -273,22 +338,20 @@ class Api extends DataObject
     }
 
     /**
-     * @param $txn_id
+     * @param array|string $txnId
      * @param AbstractPayment $redirectPayment
-     * @return \PayU\EasyPlus\Model\Response
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Response
+     * @throws LocalizedException
      */
-    public function doGetTransaction($txn_id, AbstractPayment $redirectPayment)
+    public function doGetTransaction($txnId, AbstractPayment $redirectPayment)
     {
-        $reference = isset($txn_id['PayUReference']) ? $txn_id['PayUReference'] : $txn_id;
+        $reference = $txnId['PayUReference'] ?? $txnId;
         $this->setMethodCode($redirectPayment->getCode());
         $soapClient = $this->getSoapSingleton();
 
         $data['Api'] = $this->getApiVersion();
         $data['Safekey'] = $redirectPayment->getValue('safe_key');
         $data['AdditionalInformation']['payUReference'] = $reference;
-
-        $redirectPayment->debugData(['request' => $data]);
 
         $result = $soapClient->getTransaction($data);
 
@@ -297,6 +360,12 @@ class Api extends DataObject
         $this->response = $this->responseFactory->create();
 
         $this->response->setData('return', $result->return);
+
+        $redirectPayment->debugData([
+            'info' => 'GetTransaction',
+            'request' => $data,
+            'response' => $this->response->toArray()
+        ]);
 
         return $this->response;
     }
@@ -310,7 +379,7 @@ class Api extends DataObject
 
     private function getSoapSingleton()
     {
-        if (is_null(self::$_soapClient)) {
+        if (self::$_soapClient == null) {
             $this->setGatewayEndpoint();
             $header = $this->getSoapHeader();
             $soapWsdlUrl = $this->getSoapEndpoint() . '?wsdl';
@@ -319,7 +388,7 @@ class Api extends DataObject
             $headerBody = new \SoapVar($header, XSD_ANYXML, null, null, null);
             $soapHeader = new \SOAPHeader(self::$ns, 'Security', $headerBody, true);
 
-            self::$_soapClient = new \SoapClient($soapWsdlUrl, ['trace' => 1, 'exception' => 0]);
+            self::$_soapClient = new SoapClient($soapWsdlUrl, ['trace' => 1, 'exception' => 0]);
             self::$_soapClient->__setSoapHeaders($soapHeader);
         }
 
@@ -330,14 +399,14 @@ class Api extends DataObject
      * @param AbstractPayment $redirectPayment
      * @param InfoInterface $payment
      * @param $transactionId
-     * @return \PayU\EasyPlus\Model\Response
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Response
+     * @throws LocalizedException
      */
     public function fetchTransactionInfo(AbstractPayment $redirectPayment, InfoInterface $payment, $transactionId)
     {
         $response = $this->doGetTransaction($transactionId, $redirectPayment);
 
-        $this->importPaymentInfo($this->response, $payment);
+        $this->importPaymentInfo($response, $payment);
 
         return $response;
     }

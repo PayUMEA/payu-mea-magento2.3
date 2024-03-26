@@ -11,12 +11,14 @@
 
 namespace PayU\EasyPlus\Model;
 
+use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
 use PayU\EasyPlus\Model\Api\Api;
 use PayU\EasyPlus\Model\Api\Factory;
 use PayU\EasyPlus\Model\Error\Code;
+use stdClass;
 
 /**
  * Class Response
@@ -25,12 +27,15 @@ use PayU\EasyPlus\Model\Error\Code;
  */
 class Response extends DataObject
 {
-    protected $errorCode;
+    /**
+     * @var Code
+     */
+    protected Code $errorCode;
 
     /**
      * @var Api
      */
-    protected $api;
+    protected Api $api;
 
     /**
      * @param Code $errorCodes
@@ -59,6 +64,12 @@ class Response extends DataObject
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_SUCCESSFUL;
     }
 
+    public function isPaymentNew(): bool
+    {
+        return $this->getReturn()->successful
+            && $this->getTransactionState() == AbstractPayU::TRANS_STATE_NEW;
+    }
+
     /**
      * @return bool
      */
@@ -75,6 +86,18 @@ class Response extends DataObject
     {
         return ($this->getReturn()->successful === true || $this->getReturn()->successful === false)
             && $this->getTransactionState() == AbstractPayU::TRANS_STATE_PROCESSING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPaymentFailed(): bool
+    {
+        return ($this->getReturn()->successful === true || $this->getReturn()->successful === false)
+            && in_array(
+                $this->getTransactionState(),
+                [AbstractPayU::TRANS_STATE_FAILED, AbstractPayU::TRANS_STATE_EXPIRED, AbstractPayU::TRANS_STATE_TIMEOUT]
+            );
     }
 
     public function getTranxId()
@@ -100,22 +123,41 @@ class Response extends DataObject
     /**
      * @return bool
      */
-    public function hasPaymentMethod()
+    public function hasPaymentMethod(): bool
     {
-        return isset($this->getReturn()->paymentMethodsUsed);
+        return property_exists($this->getReturn(), 'paymentMethodsUsed');
     }
 
     public function getPaymentMethod()
     {
-        return $this->getReturn()->paymentMethodsUsed;
+        return $this->hasPaymentMethod() ? $this->getReturn()->paymentMethodsUsed : null;
     }
 
     /**
      * @return bool
      */
-    public function isPaymentMethodCc()
+    public function isPaymentMethodCc(): bool
     {
-        return $this->hasPaymentMethod() && isset($this->getReturn()->paymentMethodsUsed->cardNumber);
+        return $this->hasPaymentMethod() && $this->checkPaymentMethodCc();
+    }
+
+    public function checkPaymentMethodCc(): bool
+    {
+        $paymentMethods = $this->getPaymentMethod();
+
+        if (is_array($paymentMethods)) {
+            foreach ($paymentMethods as $method) {
+                if (property_exists($method, 'gatewayReference')) {
+                    return true;
+                }
+            }
+        } else {
+            if (property_exists($paymentMethods, 'gatewayReference')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -123,27 +165,74 @@ class Response extends DataObject
      */
     public function getGatewayReference(): string
     {
-        return $this->hasPaymentMethod() ? $this->getReturn()->paymentMethodsUsed->gatewayReference : '';
+        $gatewayReference = 'N/A';
+        $paymentMethods = $this->getPaymentMethod();
+
+        if (is_array($paymentMethods)) {
+            foreach ($paymentMethods as $method) {
+                if (property_exists($method, 'gatewayReference')) {
+                    $gatewayReference = $method->gatewayReference;
+                }
+            }
+        } else {
+            if (property_exists($paymentMethods, 'gatewayReference')) {
+                $gatewayReference = $paymentMethods->gatewayReference;
+            }
+        }
+
+        return $gatewayReference;
     }
 
     /**
      * @return string
      */
-    public function getCcNumber()
+    public function getCcNumber(): string
     {
-        return $this->hasPaymentMethod() ? $this->getReturn()->paymentMethodsUsed->cardNumber : '';
+        $cardNumber = 'N/A';
+        $hasCcNumber = $this->hasPaymentMethod() && $this->isPaymentMethodCc();
+
+        if ($hasCcNumber) {
+            $paymentMethods = $this->getPaymentMethod();
+
+            if (is_array($paymentMethods)) {
+                foreach ($paymentMethods as $method) {
+                    if (property_exists($method, 'cardNumber')) {
+                        $cardNumber = $method->cardNumber;
+                    }
+                }
+            } else {
+                if (property_exists($paymentMethods, 'cardNumber')) {
+                    $cardNumber = $paymentMethods->cardNumber;
+                }
+            }
+        }
+
+        return $cardNumber;
     }
 
     public function getTotalCaptured()
     {
         $total = 0;
+
+        if ($this->isPaymentNew()) {
+            return $total;
+        }
+
         $paymentMethods = $this->getPaymentMethod();
 
         if (!$paymentMethods) {
             return $total;
         }
 
-        if (is_a($paymentMethods, \stdClass::class, true)) {
+        if (is_a($paymentMethods, stdClass::class, true) &&
+            !property_exists($paymentMethods, 'amountInCents')
+        ) {
+            return $total;
+        }
+
+        if (is_a($paymentMethods, stdClass::class, true) &&
+            property_exists($paymentMethods, 'amountInCents')
+        ) {
             return ($paymentMethods->amountInCents / 100);
         }
 
@@ -206,24 +295,28 @@ class Response extends DataObject
      * @return bool
      * @throws LocalizedException
      */
-    public function processReturn(Order $order, $processId, $processClass): bool
+    public function processReturn(Order $order, string $processId, string $processClass): bool
     {
+        $result = false;
         $payment = $order->getPayment();
-        $payment->getMethodInstance()->process($this->getParams(), $processId, $processClass);
+        $method = $payment->getMethodInstance();
 
-        /** @var Response $response */
-        $response = $payment->getMethodInstance()->getResponse();
+        try {
+            $result = $method->process($this->getParams(), $processId, $processClass);
+        } catch (LocalizedException|Exception $exception) {
+            return false;
+        }
+
+        $response = $method->getResponse();
         $this->setData($response->getData());
 
         if ($response->isPaymentSuccessful()) {
-            return true;
+            $result = true;
         } elseif ($response->isPaymentPending() || $response->isPaymentProcessing()) {
-            return false;
-        } else {
-            $payment->getMethodInstance()->declineOrder($order, $response, true);
-
-            return false;
+            $result = false;
         }
+
+        return $result;
     }
 
     /**
@@ -241,14 +334,15 @@ class Response extends DataObject
     /**
      * Process Instant Payment Notification
      *
-     * @param array $data
      * @param Order $order
+     * @param array $data
      * @param string $processId
+     * @param string $processClass
      * @throws LocalizedException
      */
-    public function processNotify($data, $order, $processId, $processClass)
+    public function processNotify(Order $order, array $data, string $processId, string $processClass)
     {
         $payment = $order->getPayment();
-        $payment->getMethodInstance()->processNotification($data, $order, $processId, $processClass);
+        $payment->getMethodInstance()->processNotification($order, $data, $processId, $processClass);
     }
 }
