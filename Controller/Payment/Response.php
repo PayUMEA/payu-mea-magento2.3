@@ -69,7 +69,7 @@ class Response extends AbstractAction
             $order = $this->_orderFactory->create()->loadByIncrementId($orderId);
 
             if (!$order) {
-                throw new LocalizedException(__("Order no found"));
+                return $this->sendFailedPage('Order no found');
             }
 
             $orderState = $order->getState();
