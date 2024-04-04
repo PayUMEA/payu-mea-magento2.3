@@ -65,7 +65,7 @@ class Request extends DataObject
     ) {
         $additionalInformation = [
             'merchantReference'         => $order->getIncrementId(),
-            'notificationUrl'           => 'https://sacred-sincere-condor.ngrok-free.app/payu_easyplus/payment/notify',//$helper->getNotificationUrl($paymentMethod->getCode()),
+            'notificationUrl'           => $helper->getNotificationUrl($paymentMethod->getCode()),
             'cancelUrl'                 => $helper->getCancelUrl($paymentMethod->getCode()),
             'returnUrl'                 => $helper->getReturnUrl($paymentMethod->getCode()),
             'supportedPaymentMethods'   => $paymentMethod->getConfigData('payment_methods'),
