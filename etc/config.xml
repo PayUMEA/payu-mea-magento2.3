@@ -7,16 +7,21 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
     <default>
-        <payment>
-            <payumea_cron>
-                <bypass_payu_cron>1</bypass_payu_cron>
+        <payumea>
+            <cron>
+                <bypass>1</bypass>
                 <order_status>pending,pending_payment</order_status>
-                <payumea_cron_delay>5</payumea_cron_delay>
-            </payumea_cron>
-            <payumea_txn_log>
+                <cron_delay>5</cron_delay>
+            </cron>
+            <txn_log>
                 <enable>1</enable>
                 <keep_log>30</keep_log>
-            </payumea_txn_log>
+            </txn_log>
+            <redirect>
+                <bypass>0</bypass>
+            </redirect>
+        </payumea>
+        <payment>
             <payumea_creditcard>
                 <model>PayU\EasyPlus\Model\CreditCard</model>
                 <active>0</active>

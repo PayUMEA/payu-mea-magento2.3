@@ -24,7 +24,7 @@ class Response extends AbstractAction
 {
     public function getRedirectConfigData($field, $storeId = null)
     {
-        $path = 'payment/payumea_redirect_config/' . $field;
+        $path = 'payumea/redirect/' . $field;
 
         return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
@@ -95,7 +95,7 @@ class Response extends AbstractAction
                 $alreadyProcessed = true;
             }
 
-            $bypassPayuRedirect = (bool)$this->getRedirectConfigData('bypass_payu_redirect');
+            $bypassPayuRedirect = (bool)$this->getRedirectConfigData('bypass');
 
             if ($bypassPayuRedirect) {
                 $this->logger->debug([

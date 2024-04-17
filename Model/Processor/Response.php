@@ -71,7 +71,7 @@ class Response
         $resourceModel = $this->payUTransactionResourceFactory->create();
         $resourceModel->load($transaction, $incrementId, 'increment_id');
 
-        if ($transaction->getId() > 0 && $transaction->getLock() && $transaction->getStatus() === 'processing') {
+        if ($transaction->getId() > 0) {
             return false;
         }
 
