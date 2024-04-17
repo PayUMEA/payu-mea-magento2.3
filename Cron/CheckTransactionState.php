@@ -253,7 +253,7 @@ class CheckTransactionState
      */
     public function execute()
     {
-        $bypassPayuCron = $this->getCRONConfigData('bypass_payu_cron');
+        $bypassPayuCron = $this->getCRONConfigData('bypass');
 
         if ('1' ===  $bypassPayuCron) {
             $this->_logger->info("PayU CRON DISABLED");
@@ -299,14 +299,14 @@ class CheckTransactionState
                 $payUReference = $additionalInfo["payUReference"];
             }
 
-            $stateTest = $additionalInfo["fraud_details"]["return"]["transactionState"] ?? '';
+            $txnState = $additionalInfo["fraud_details"]["return"]["transactionState"] ?? '';
 
-            switch ($stateTest) {
+            switch ($txnState) {
                 case AbstractPayU::TRANS_STATE_SUCCESSFUL:
                 case AbstractPayU::TRANS_STATE_FAILED:
                 case AbstractPayU::TRANS_STATE_EXPIRED:
                 case AbstractPayU::TRANS_STATE_TIMEOUT:
-                    $this->_logger->info(" ($id) Transaction in a final state: $stateTest");
+                    $this->_logger->info(" ($id) Transaction in a final state: $txnState");
                     break;
                 default:
 
@@ -370,17 +370,17 @@ class CheckTransactionState
         $minutesCreated = (int) ceil(($timeNow - $createdAt) / 60);
         $minutesUpdated = $minutesCreated - (int) ceil(($timeNow - $updatedAt) / 60);
 
-        $payumeaCronDelay = $this->getCRONConfigData('payumea_cron_delay');
+        $cronDelay = $this->getCRONConfigData('delay');
 
-        if (empty($payumeaCronDelay)) {
-            $payumeaCronDelay = "5";
+        if (empty($cronDelay)) {
+            $cronDelay = "5";
         }
 
-        $this->_logger->info("($this->processId) minutes_created: $minutesCreated - Delay: $payumeaCronDelay");
-        $this->_logger->info("($this->processId) minutes_updated: $minutesUpdated - Delay: $payumeaCronDelay");
+        $this->_logger->info("($this->processId) minutes_created: $minutesCreated - Delay: $cronDelay");
+        $this->_logger->info("($this->processId) minutes_updated: $minutesUpdated - Delay: $cronDelay");
 
-        $minutesCreated = $minutesCreated - $payumeaCronDelay;
-        $minutesUpdated = $minutesUpdated - $payumeaCronDelay;
+        $minutesCreated = $minutesCreated - $cronDelay;
+        $minutesUpdated = $minutesUpdated - $cronDelay;
 
         $ranges = [];
         $ranges[] = [1, 4];
@@ -449,7 +449,7 @@ class CheckTransactionState
 
     public function getCRONConfigData($field, $storeId = null)
     {
-        $path = 'payment/payumea_cron/' . $field;
+        $path = 'payumea/cron/' . $field;
 
         return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }

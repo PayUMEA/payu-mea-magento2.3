@@ -80,7 +80,7 @@ class CleanTransactionLog
      */
     protected function getConfigValue(string $field, $storeId = null)
     {
-        $path = 'payment/payumea_txn_log/' . $field;
+        $path = 'payumea/txn_log/' . $field;
 
         return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
