@@ -11,7 +11,7 @@ use Magento\Framework\Model\ResourceModel\Db\Context;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 
 /**
- * Resource Authorize.net debug model
+ * Resource model
  */
 class Transaction extends AbstractDb
 {

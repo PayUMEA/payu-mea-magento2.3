@@ -14,6 +14,7 @@ use Magento\Framework\App\Action\Action as AppAction;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Session\Generic;
@@ -436,5 +437,14 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
         ob_end_flush();
         ob_flush();
         flush();
+    }
+
+    protected function returnToCart()
+    {
+        $this->_returnCustomerQuote();
+
+        return $this->resultFactory
+            ->create(ResultFactory::TYPE_REDIRECT)
+            ->setPath('checkout/cart');
     }
 }
