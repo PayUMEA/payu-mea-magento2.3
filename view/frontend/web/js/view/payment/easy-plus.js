@@ -86,6 +86,10 @@ define(
             {
                 type: 'payumea_capitec_pay',
                 component: 'PayU_EasyPlus/js/view/payment/method-renderer/capitec_pay-method'
+            },
+            {
+                type: 'payumea_masterpass',
+                component: 'PayU_EasyPlus/js/view/payment/method-renderer/masterpass-method'
             }
         );
         /** Add view logic here if needed */
