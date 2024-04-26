@@ -345,4 +345,18 @@ class Response extends DataObject
         $payment = $order->getPayment();
         $payment->getMethodInstance()->processNotification($order, $data, $processId, $processClass);
     }
+
+    /**
+     * Is Canceled Payflex transaction
+     *
+     * @param Order $order
+     * @return bool
+     */
+    public function isCancelPayflex(Order $order)
+    {
+        $payment = $order->getPayment();
+        $method = $payment->getMethodInstance();
+
+        return $method->getCode() === Payflex::CODE && $this->isPaymentProcessing();
+    }
 }

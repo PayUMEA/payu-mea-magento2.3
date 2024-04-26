@@ -13,7 +13,6 @@ namespace PayU\EasyPlus\Controller\Payment;
 
 use Exception;
 use Magento\Framework\App\ResponseInterface;
-use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
@@ -155,6 +154,12 @@ class Response extends AbstractAction
 
                 $message = $this->response->getDisplayMessage();
 
+                if ($this->response->isCancelPayflex($order)) {
+                    $this->messageManager->addErrorMessage($message);
+                    
+                    return $this->returnToCart();
+                }
+
                 if ($this->response->isPaymentPending() || $this->response->isPaymentProcessing()) {
                     $this->messageManager->addNoticeMessage($message);
 
@@ -175,10 +180,6 @@ class Response extends AbstractAction
 
         $this->responseProcessor->updateTransactionLog($orderId, $processId);
 
-        $this->_returnCustomerQuote();
-
-        return $this->resultFactory
-            ->create(ResultFactory::TYPE_REDIRECT)
-            ->setPath('checkout/cart');
+        return $this->returnToCart();
     }
 }
