@@ -12,6 +12,7 @@ use Exception;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\OrderFactory;
+use PayU\EasyPlus\Model\Payflex;
 use PayU\EasyPlus\Model\ResourceModel\TransactionFactory as PayUTransactionResourceFactory;
 use PayU\EasyPlus\Model\TransactionFactory as PayUTransactionFactory;
 
@@ -20,6 +21,7 @@ class Response
     public const PENDING_PAGE = 1;
     public const SUCCESS_PAGE = 2;
     public const FAILED_PAGE = 3;
+    public const RETURN_CART = 4;
 
     /**
      * @var Logger
@@ -127,8 +129,9 @@ class Response
     {
         $order = $this->orderFactory->create()->loadByIncrementId($incrementId);
         $payment = $order->getPayment();
+        $method = $payment->getMethodInstance();
 
-        $response = $payment->getMethodInstance()->fetchTransactionInfo($payment, $payUReference);
+        $response = $method->fetchTransactionInfo($payment, $payUReference);
 
         switch ($response->getTransactionState()) {
             case 'FAILED':
@@ -142,6 +145,10 @@ class Response
                 break;
             default:
                 $page = self::SUCCESS_PAGE;
+        }
+
+        if ($response->isCancelPayflex($order)) {
+            $page = self::RETURN_CART;
         }
 
         return $page;

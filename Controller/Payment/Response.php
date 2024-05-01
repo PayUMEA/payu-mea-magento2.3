@@ -56,6 +56,9 @@ class Response extends AbstractAction
                         return $this->sendSuccessPage();
                     case \PayU\EasyPlus\Model\Processor\Response::FAILED_PAGE:
                         return $this->sendFailedPage();
+                    case \PayU\EasyPlus\Model\Processor\Response::RETURN_CART:
+                        $this->messageManager->addErrorMessage('User canceled transaction');
+                        return $this->returnToCart();
                     default:
                         return $this->sendPendingPage();
                 }
