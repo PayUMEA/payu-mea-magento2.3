@@ -59,7 +59,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
         $canProceed = $this->responseProcessor->canProceed($incrementId, $processId, $processClass);
 
         if (!$canProceed) {
-            $this->respond();
+            $this->respond('200', 'OK');
 
             return $resultJson;
         }
@@ -80,7 +80,7 @@ class Notify extends AbstractAction implements CsrfAwareActionInterface
             return $resultJson;
         }
 
-        $this->respond();
+        $this->respond('200', 'OK');
         $this->response->processNotify($order, $ipnData, $processId, $processClass);
         $this->responseProcessor->updateTransactionLog($incrementId, $processId);
 

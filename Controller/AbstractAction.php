@@ -408,17 +408,15 @@ abstract class AbstractAction extends AppAction implements RedirectLoginInterfac
      */
     protected function respond(string $httpCode = '200', $text = null)
     {
-        if ($httpCode === '200') {
-            if (is_callable('fastcgi_finish_request')) {
-                if ($text !== null) {
-                    echo $text;
-                }
-
-                session_write_close();
-                fastcgi_finish_request();
-
-                return;
+        if ($httpCode === '200' && is_callable('fastcgi_finish_request')) {
+            if ($text !== null) {
+                echo $text;
             }
+
+            session_write_close();
+            fastcgi_finish_request();
+
+            return;
         }
 
         ignore_user_abort(true);
