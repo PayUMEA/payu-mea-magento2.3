@@ -147,7 +147,7 @@ class Response
                 $page = self::SUCCESS_PAGE;
         }
 
-        if ($response->isCancelPayflex($order)) {
+        if ($response->isCancelPayflex($order) || $response->isMasterpassTimeout($order)) {
             $page = self::RETURN_CART;
         }
 
