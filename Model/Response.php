@@ -359,4 +359,18 @@ class Response extends DataObject
 
         return $method->getCode() === Payflex::CODE && $this->isPaymentProcessing();
     }
+
+    /**
+     * Is Canceled Payflex transaction
+     *
+     * @param Order $order
+     * @return bool
+     */
+    public function isMasterpassTimeout(Order $order)
+    {
+        $payment = $order->getPayment();
+        $method = $payment->getMethodInstance();
+
+        return $method->getCode() === MasterPass::CODE && $this->isPaymentProcessing();
+    }
 }

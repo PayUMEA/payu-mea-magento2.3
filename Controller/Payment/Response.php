@@ -13,6 +13,7 @@ namespace PayU\EasyPlus\Controller\Payment;
 
 use Exception;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
@@ -31,7 +32,7 @@ class Response extends AbstractAction
     /**
      * Retrieve transaction information and validates payment
      *
-     * @return \Magento\Framework\Controller\Result\Redirect|ResponseInterface
+     * @return Redirect|ResponseInterface
      * @throws Exception
      */
     public function execute()
@@ -42,6 +43,10 @@ class Response extends AbstractAction
 
         $orderId = $this->_getCheckoutSession()->getLastRealOrderId() ??
             $this->_getCheckoutSession()->getData('last_real_order_id');
+
+        if (!$orderId) {
+            return $this->returnToCart();
+        }
 
         try {
             $payUReference = $this->getPayUReference();
@@ -71,7 +76,7 @@ class Response extends AbstractAction
             $order = $this->_orderFactory->create()->loadByIncrementId($orderId);
 
             if (!$order) {
-                return $this->sendFailedPage('Order no found');
+                return $this->sendFailedPage('Order not found');
             }
 
             $orderState = $order->getState();
@@ -157,9 +162,9 @@ class Response extends AbstractAction
 
                 $message = $this->response->getDisplayMessage();
 
-                if ($this->response->isCancelPayflex($order)) {
+                if ($this->response->isCancelPayflex($order) || $this->response->isMasterpassTimeout($order)) {
                     $this->messageManager->addErrorMessage($message);
-                    
+
                     return $this->returnToCart();
                 }
 
