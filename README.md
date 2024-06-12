@@ -55,4 +55,8 @@ php bin/magento cache:clean
 To configure the extension, you have to navigate to **Stores > Configuration > Sales > Payment Methods** and find PayU 
 extension listed among other payment methods
 
+When configuring/enablind any payment method please remember to turn off the "Default" setting on every option in given payment method and choose specific value from a dropdown menu:
+![image](https://github.com/PayUMEA/payu-mea-magento2.3/assets/51436301/27190236-b254-4b6f-878b-d33c8dbc5e38)
+
+
 For Kenyan payment methods (Mpesa, Equitel, Airtel Money, Mobile Banking) - configuration in Stores->Configuration->Customers->Customer Configuration->Name and Address Options->Show Telephone must be set to "Required"
