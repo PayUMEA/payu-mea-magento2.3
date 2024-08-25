@@ -225,7 +225,12 @@ class CheckTransactionState
             case 'FAILED':
             case 'TIMEOUT':
             case 'EXPIRED':
-                $order->cancel();
+                if ($order->canCancel()) {
+                    $order->cancel();
+                } else {
+                    $order->setState(Order::STATE_CLOSED)
+                        ->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_CLOSED));
+                }
                 break;
         }
 
@@ -352,7 +357,7 @@ class CheckTransactionState
                     }
 
                     $order->setUpdatedAt(null);
-                    $order->save();
+                    $this->_orderRepository->save($order);
                     break;
             }
         }
