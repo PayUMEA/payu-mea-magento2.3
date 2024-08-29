@@ -112,7 +112,11 @@ class Response extends DataObject
 
     public function getResultCode()
     {
-        return $this->getReturn()->resultCode;
+        if (property_exists($this->getReturn(), 'resultCode')) {
+            return $this->getReturn()->resultCode;
+        } else {
+            return 'N/A';
+        }
     }
 
     public function getResultMessage()
