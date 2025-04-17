@@ -53,7 +53,7 @@
                 <safe_key>{07F70723-1B96-4B97-B891-7BF708594EEA}</safe_key>
                 <payment_methods>PAYFLEX</payment_methods>
                 <redirect_channel>responsive</redirect_channel>
-                <min_order_total>1</min_order_total>
+                <min_order_total>10</min_order_total>
                 <max_order_total>5000000</max_order_total>
                 <developer>
                     <active>0</active>
