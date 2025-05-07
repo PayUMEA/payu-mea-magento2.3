@@ -2,6 +2,7 @@
 
 This guide details how to install the PayU MEA Magento v2.X extension
 This plugin is also compatible with Magento v2.3
+
 For Magento 2.4.X please use https://github.com/PayUMEA/gateway-magento
 
 ## Prerequisites
